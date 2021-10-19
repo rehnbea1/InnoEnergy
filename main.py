@@ -13,25 +13,25 @@ my_label = Label(gui, text = "Welcome to read file")
 
 
 def select_file():
-
+    print("hej")
     filetypes = (('csv-files', '*.pdf'),('All files', '*.*'))
+    print("filenames",filetypes)
     filename = fd.askopenfilename(title='Open a file',initialdir='documents/',filetypes=filetypes)
+    print("fil")
+    print(filename)
+
     file_info=Label(gui,text=filename).pack()
-    return filename
 
-
-file = Button(gui, text='Browse file', command = select_file)
-print("hej")
+#denna del returnerar inget värde för "fil"
+file = Button(gui, text='Browse file', command = lambda: select_file()).pack()
 print(file)
+print("hej")
+#print(file)
 
-
-#print(open_button)
-
-#print(open_button.select_file)
 
 #file = select_file
 #with open(file,'r') as file:#
 #    file = file.read()
-file.pack()
+
 my_label.pack()
 gui.mainloop()
