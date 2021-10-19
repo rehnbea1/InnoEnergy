@@ -5,7 +5,6 @@ from tkinter import filedialog as fd
 from tkinter.ttk import *
 
 
-
 gui = Tk()
 gui.title("Energy management system 1.0")
 gui.geometry("500x500")
@@ -13,15 +12,28 @@ gui.geometry("500x500")
 my_label = Label(gui, text = "Welcome to read file")
 
 
-
 def select_file():
+
     filetypes = (('csv-files', '*.pdf'),('All files', '*.*'))
-    filename = fd.askopenfilename(title='Open a file',initialdir='/',filetypes=filetypes)
+    filename = fd.askopenfilename(title='Open a file',initialdir='documents/',filetypes=filetypes)
     file_info=Label(gui,text=filename).pack()
+    #print(filename)
+    return filename
 
-open_button = Button(gui, text='Browse file',command = select_file)
+file = input(Button(gui, text='Browse file', command = select_file))
+
+file.pack()
+print("hej")
+print(file)
 
 
-open_button.pack()
+#print(open_button)
+
+#print(open_button.select_file)
+
+#file = select_file
+#with open(file,'r') as file:#
+#    file = file.read()
+
 my_label.pack()
 gui.mainloop()
