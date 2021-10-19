@@ -17,12 +17,10 @@ def select_file():
     filetypes = (('csv-files', '*.pdf'),('All files', '*.*'))
     filename = fd.askopenfilename(title='Open a file',initialdir='documents/',filetypes=filetypes)
     file_info=Label(gui,text=filename).pack()
-    #print(filename)
     return filename
 
-file = input(Button(gui, text='Browse file', command = select_file))
 
-file.pack()
+file = Button(gui, text='Browse file', command = select_file)
 print("hej")
 print(file)
 
@@ -34,6 +32,6 @@ print(file)
 #file = select_file
 #with open(file,'r') as file:#
 #    file = file.read()
-
+file.pack()
 my_label.pack()
 gui.mainloop()
