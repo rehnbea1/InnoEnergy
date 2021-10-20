@@ -31,7 +31,6 @@ def Check_file(file,gui):
     #checks if the file selected is ok
     file=str(file)
     if file.endswith('csv'):
-        print("nice")
         return file
     else:
         print("this is not a csv file")
