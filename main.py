@@ -16,29 +16,16 @@ my_label = Label(gui, text = "Welcome to read file")
 #Läsa, skriva och ändra csv-filen sker inne i denna funktion
 def Delta():
     file_1 = myfunctions.Select_file(gui)
+    file_1 = myfunctions.Check_file(file_1,gui)
+    file_info = Label(gui,text="The file you chose is: "+ file_1).pack()
 
-    while file_1 == 0:
-        Label(gui, text="the file you wanted to read didn't work. Try again?")
-        Choice = myfunctions.option_popup(gui)
-        if Choice == False:
-            file = Button(gui, text='Browse file', command = myfunctions.Select_file(gui)).pack()
-        else:
-            print("ok")
-            file_2 = myfunctions.Select_file(gui)
-            file_info = Label(gui,text="The file you chose is: " + file_1).pack()
-            myfunctions.Read_file(filename,gui)
-    print("ok")
     file_2 = myfunctions.Select_file(gui)
-    file_info = Label(gui,text = "The file you chose is: " + file_1).pack()
-    myfunctions.Read_file(filename,gui)
+    file_2 = myfunctions.Check_file(file_2,gui)
+    file_info = Label(gui,text="The file you chose is: "+ file_2).pack()
 
-    while file_2 == False:
-        Label(gui, text="the file you wanted to read didn't work. Try again?")
-        Answer = tk.Entry(master)
-        if Answer == "J":
-            file = Button(gui, text='Browse file', command = myfunctions.Select_file(gui))
-        else:
-            file_2 = "Empty"
+    myfunctions.Read_file(file_1,gui)
+    myfunctions.Read_file(file_2,gui)
+
 
 
 #Denna gör att filläsningsfunktionen kallas

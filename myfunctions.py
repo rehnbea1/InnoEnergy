@@ -7,20 +7,14 @@ from tkinter import filedialog as fd
 from tkinter import messagebox
 
 def Select_file(gui):
-    print("hej")
     filetypes = (('csv-files', '*.pdf'),('All files', '*.*'))
     filename = fd.askopenfilename(title='Open a file',initialdir='documents/',filetypes=filetypes)
-    if filename != '*.csv' :
-        print("this is not a csv file")
-        return 0
-
     return filename
 
 def Read_file(filename,gui):
     #try:
     with open(filename,'r') as file:
         file = file.read()
-
 
     #except FileNotFoundError:
     #    Label(gui,text="Error! Could not read the file, make sure you selected the right file").pack()
@@ -30,5 +24,25 @@ def Read_file(filename,gui):
     #    return False
 
 def option_popup(gui):
-    tk.messagebox.askyesno(title="Option", message="Your file is invalid. Do you want to try again?")
-    return
+    Choice = tk.messagebox.askyesno(title="Option", message="Your file is invalid. Do you want to try again?")
+    return Choice
+
+def Check_file(file,gui):
+    #checks if the file selected is ok
+    if file != '*.csv' :
+        print("this is not a csv file")
+        file = False
+        while file == False:
+            Choice = option_popup(gui)
+            if Choice == True:
+                file = Select_file(gui)
+                if file != '*.csv' :
+                    file = False
+                else:
+                    file = file
+            elif Choice == False:
+                file = "Not selected"
+                print("ok")
+        return file
+    else:
+        return file
