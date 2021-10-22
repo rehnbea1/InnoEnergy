@@ -42,9 +42,12 @@ def Read_file(filename,gui):
                 i+=1
             DATA[b] = Data
             b+=1
+
         print("YOUR DICTIONARY LOOKS LIKE THIS:", DATA)
-
-
+        x = Label(gui,text="Read following data:").pack()
+        y = Label(gui, text=DATA).pack()
+        file.close()
+    return DATA
 
 
 
