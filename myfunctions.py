@@ -12,18 +12,19 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-def Delta2(gui, DATA1):
-    file_2 = Select_file(gui)
-    file_2 = Check_file(file_2,gui)
-    file_info = Label(gui,text="Your selection for File_2: "+ file_2)
-    file_info.grid(row = 2, column = 1, pady = 5)
+#def Delta2(gui, DATA1):
+    #file_2 = Select_file(gui)
+    #file_2 = Check_file(file_2,gui)
+    #file_info = Label(gui,text="Your selection for File_2: "+ file_2)
+    #file_info.grid(row = 2, column = 1, pady = 5)
 
-    DATA2 = Read_file2(file_2,gui)
-
+    #DATA2 = Read_file2(file_2,gui)
+    #radera kanske?
     #disp_data2 = Button(gui, text='Display data', command = lambda:myfunctions.show_data(gui,DATA)).grid(row=3, column = 1)
 
-    House_data = Button(gui, text="calculate house data", command = lambda:House(gui,DATA1,DATA2)).grid(row=3, column = 0)
-
+    #ta fram före inlämning!!!!
+    #House_data = Button(gui, text="calculate house data", command = lambda:House(gui,DATA1,DATA2)).grid(row=3, column = 0)
+    #House_data = House(gui,DATA1,DATA2)
 
 def Select_file(gui):
     filetypes = (('csv-files', '*.csv'),('All files', '*.*'))
@@ -35,7 +36,6 @@ def Read_file2(filename,gui):
     file = pd.read_csv(filename)
     return file
     #try:
-
 
     #except FileNotFoundError:
     #    Label(gui,text="Error! Could not read the file, make sure you selected the right file").pack()
