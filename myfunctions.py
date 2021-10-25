@@ -114,12 +114,16 @@ def House(gui, df1, df2):
     #print("length",df['Length'])
     #print('height',df['Height'])
     Static_values = {'Uvalue_roof' : 8/100,'Uvalue_floor': 14/100}
-
+    df2 = Add_par(df2, Static_values)
     Area = (df2['Length (m)']*df2['Depth (m)'])*2 + (df2['Length (m)']*df2['Height (m)'])*4
     Volume = df2['Length (m)']*df2['Depth (m)']*df2['Height (m)']
     WindowA = Area - ((df2['Length (m)']*df2['Height (m)'])*4) * df2['Awindow/Awall ratio']
     heat_loss_radiation = Area * df2['UWalls (W/(m^2K)'] + WindowA * df2['UWindows (W/(m^2K)']
-    heat_loss = HLC(df1, df2, heat_loss_radiation)
+
+    df1 = HLC(df1, df2, heat_loss_radiation)
+
+    print(df1.describe())
+    print(df2.describe())
 
     return
 
@@ -138,7 +142,16 @@ def HLC(df1,df2,heat_loss_radiation):
     for row in df1.iterrows():
         df1['H_loss (kW)'] = df1['DeltaT (°C)']*heat_loss_radiation[0]/1000
 
-
     print('uppdaterad df1:')
     print(df1)
-    return
+    return df1
+
+def Add_par(df2,static_values):
+        for x in static_values:
+            print("item", x)
+            print("svi", static_values[x])
+
+            df2[x] = static_values[x]
+
+        print(df2)
+        return df2
