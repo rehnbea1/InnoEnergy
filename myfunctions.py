@@ -7,58 +7,34 @@ from tkinter.ttk import *
 from tkinter import filedialog as fd
 from tkinter import messagebox
 import pandas as pd
-
+#import math
 import numpy as np
 import matplotlib.pyplot as plt
 
 
+def Delta2(gui, DATA1):
+    file_2 = Select_file(gui)
+    file_2 = Check_file(file_2,gui)
+    file_info = Label(gui,text="Your selection for File_2: "+ file_2)
+    file_info.grid(row = 2, column = 1, pady = 5)
+
+    DATA2 = Read_file2(file_2,gui)
+
+    #disp_data2 = Button(gui, text='Display data', command = lambda:myfunctions.show_data(gui,DATA)).grid(row=3, column = 1)
+
+    House_data = Button(gui, text="calculate house data", command = lambda:House(gui,DATA1,DATA2)).grid(row=3, column = 0)
+
 
 def Select_file(gui):
-
     filetypes = (('csv-files', '*.csv'),('All files', '*.*'))
-    filename = fd.askopenfilename(title='Open a file',initialdir='documents/',filetypes=filetypes)
+    filename = fd.askopenfilename(title='Open a file',initialdir='downloads/',filetypes=filetypes)
     return filename
-
-
-def Read_file(filename,gui):
-
-    #try:
-    with open(filename,'r') as file:
-        Data ={}
-        i=0
-        file_reader = csv.reader(file)
-        #header = next(file_reader)
-        for line in file_reader:
-            Data.update({i:line})
-            i=i+1
-
-        print("YOUR DICTIONARY LOOKS LIKE THIS:", Data)
-        #x = Label(gui,text="Read following data:")
-        #y = Label(gui, text=List)
-        file.close()
-        return Data
-
 
 def Read_file2(filename,gui):
 
+    file = pd.read_csv(filename)
+    return file
     #try:
-    df = pd.read_csv(filename)
-    #for index in df.iterrows():
-#    Length (m)  Depth (m)  Height (m)  UWalls (W/(m^2K)  UWindows (W/(m^2K)  Awindow/Awall ratio  Air Changes per Hour (h^-1)  Tinside (ÂºC)  Qpeople (W)  Window Solar Gain  Height Lights (m)
-#0          10          5           3                 1                   2                  0.2                          0.5              2          120               0.25                1.5
-
-
-    print(df)
-    #print("length",df['Length'])
-    #print('height',df['Height'])
-    Area = (df['Length (m)']*df['Depth (m)'])*2 + (df['Length (m)']*df['Height (m)'])*4
-    Volume = df['Length (m)']*df['Depth (m)']*df['Height (m)']
-    WindowA = Area - ((df['Length (m)']*df['Height (m)'])*4) * df['Awindow/Awall ratio']
-
-    Heat_loss = Area * df['UWalls (W/(m^2K)'] + WindowA * df['UWindows (W/(m^2K)']
-    print(Area)
-
-
 
 
     #except FileNotFoundError:
@@ -106,7 +82,7 @@ def show_data(gui,data):
         i+=1
     return
 
-def analysis(gui, data):
+#def analysis(gui, data):
     print ("Analysis of:",data)
     Xaxis = []
     Yaxis = []
@@ -123,5 +99,46 @@ def analysis(gui, data):
     #plt.plot(Xaxis,Yaxis)
     plt.show()
 
-def house(gui, data):
-    pass
+def House(gui, df1, df2):
+    print("Entered: House function")
+
+#Data1     Hour  Temp (ºC)  Wind speed  Rad\n (W/m2)  Occupation  Lighting (Lux) %Total Area Lighting %AreaHeatingCooling  Hot Water L at 40º  Cooking (MJ) Electrical Applainces (kWh)
+#0      0      10.24        6.57          0.00           3               0                    0                 25%                   0             0
+
+
+    #DATA 2 Length (m)  Depth (m)  Height (m)  UWalls (W/(m^2K)  UWindows (W/(m^2K)  Awindow/Awall ratio  Air Changes per Hour (h^-1)  Tinside (ÂºC)  Qpeople (W)  Window Solar Gain  Height Lights (m)
+#0          10          5           3                 1                   2                  0.2                          0.5              2          120               0.25                1.5
+
+    print("Data1",df1)
+    print("data2",df2)
+    #print("length",df['Length'])
+    #print('height',df['Height'])
+    Static_values = {'Uvalue_roof' : 8/100,'Uvalue_floor': 14/100}
+
+    Area = (df2['Length (m)']*df2['Depth (m)'])*2 + (df2['Length (m)']*df2['Height (m)'])*4
+    Volume = df2['Length (m)']*df2['Depth (m)']*df2['Height (m)']
+    WindowA = Area - ((df2['Length (m)']*df2['Height (m)'])*4) * df2['Awindow/Awall ratio']
+    heat_loss_radiation = Area * df2['UWalls (W/(m^2K)'] + WindowA * df2['UWindows (W/(m^2K)']
+    heat_loss = HLC(df1, df2, heat_loss_radiation)
+
+    return
+
+def HLC(df1,df2,heat_loss_radiation):
+
+    print("HLR",heat_loss_radiation)
+    #Calculate delta T
+    #take delta T times U value
+    print("HLC")
+
+    temp_in = df2['Tinside (ÂºC)'][0]
+    print('test',temp_in)
+
+    for row in df1.iterrows():
+        df1['DeltaT (°C)'] = df1['Temp (ºC)']-temp_in
+    for row in df1.iterrows():
+        df1['H_loss (kW)'] = df1['DeltaT (°C)']*heat_loss_radiation[0]/1000
+
+
+    print('uppdaterad df1:')
+    print(df1)
+    return
