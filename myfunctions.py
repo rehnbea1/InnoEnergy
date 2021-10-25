@@ -6,6 +6,10 @@ from tkinter import *
 from tkinter.ttk import *
 from tkinter import filedialog as fd
 from tkinter import messagebox
+import pandas as pd
+
+import numpy as np
+import matplotlib.pyplot as plt
 
 
 
@@ -20,35 +24,39 @@ def Read_file(filename,gui):
 
     #try:
     with open(filename,'r') as file:
-        file_reader = csv.reader(file)
         Data ={}
-        DATA ={}
-        Header = next(file_reader)
-        for i in Header:
-            Data[i] = []
-
-        #print("data-1", Data)
-        b=0
+        i=0
+        file_reader = csv.reader(file)
+        #header = next(file_reader)
         for line in file_reader:
-            A=[]
+            Data.update({i:line})
+            i=i+1
 
-            for i in line:
-                A.append(i)
-            #print(A)
-            i=0
-
-            for x in Data:
-                Data[x] = A[i]
-                i+=1
-            DATA[b] = Data
-            b+=1
-
-        print("YOUR DICTIONARY LOOKS LIKE THIS:", DATA)
-        x = Label(gui,text="Read following data:").pack()
-        y = Label(gui, text=DATA).pack()
+        print("YOUR DICTIONARY LOOKS LIKE THIS:", Data)
+        #x = Label(gui,text="Read following data:")
+        #y = Label(gui, text=List)
         file.close()
-    return DATA
+        return Data
 
+
+def Read_file2(filename,gui):
+
+    #try:
+    df = pd.read_csv(filename)
+    #for index in df.iterrows():
+#    Length (m)  Depth (m)  Height (m)  UWalls (W/(m^2K)  UWindows (W/(m^2K)  Awindow/Awall ratio  Air Changes per Hour (h^-1)  Tinside (ÂºC)  Qpeople (W)  Window Solar Gain  Height Lights (m)
+#0          10          5           3                 1                   2                  0.2                          0.5              2          120               0.25                1.5
+
+
+    print(df)
+    #print("length",df['Length'])
+    #print('height',df['Height'])
+    Area = (df['Length (m)']*df['Depth (m)'])*2 + (df['Length (m)']*df['Height (m)'])*4
+    Volume = df['Length (m)']*df['Depth (m)']*df['Height (m)']
+    WindowA = Area - ((df['Length (m)']*df['Height (m)'])*4) * df['Awindow/Awall ratio']
+
+    Heat_loss = Area * df['UWalls (W/(m^2K)'] + WindowA * df['UWindows (W/(m^2K)']
+    print(Area)
 
 
 
@@ -59,14 +67,12 @@ def Read_file(filename,gui):
     #except UnicodeDecodeError:
     #    Label(gui,text="Error! Could not decrypt the file, make sure you selected the right file").pack()
     #    return False
-
+    return
 
 def option_popup(gui):
 
     Choice = tk.messagebox.askyesno(title="Option", message="Your file is invalid. Do you want to try again?")
     return Choice
-
-
 
 def Check_file(file,gui):
 
@@ -88,4 +94,34 @@ def Check_file(file,gui):
             elif Choice == False:
                 file = "Not selected"
                 print("ok")
-        return file
+    return file
+
+def show_data(gui,data):
+    i=5
+    a = len(data.keys())
+    print("show_data")
+    for x in range(a):
+
+        Label(gui, text=data[x]).grid(row=i, column=0)
+        i+=1
+    return
+
+def analysis(gui, data):
+    print ("Analysis of:",data)
+    Xaxis = []
+    Yaxis = []
+    for x in data:
+        #print(data.get(x)[0])
+        Xaxis.append(data.get(x)[0])
+        Yaxis.append(data.get(x)[1])
+    print("X", Xaxis)
+    print("Y", Yaxis)
+    plt.axis([0, 20, 0, 25]);
+    fig = plt.figure()
+    ax = plt.axes()
+    ax.scatter(Xaxis, Yaxis);
+    #plt.plot(Xaxis,Yaxis)
+    plt.show()
+
+def house(gui, data):
+    pass
