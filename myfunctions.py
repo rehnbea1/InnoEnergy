@@ -148,10 +148,10 @@ def HLC(df1,df2, heat_loss_radiation):
     #Calculate delta T
     #take delta T times U value
     temp_in = df2['Tinside(ºC)'][0]
-    for row in df1.iterrows():
-        df1['DeltaT (°C)'] = df1['Temp']-temp_in
-    for row in df1.iterrows():
-        df1['H_loss (kW)'] = df1['DeltaT (°C)']*heat_loss_radiation[0]/1000
+
+    df1['DeltaT (°C)'] = df1['Temp']-temp_in
+
+    df1['H_loss (kW)'] = df1['DeltaT (°C)']*heat_loss_radiation[0]/1000
     return df1
 
 
@@ -171,8 +171,7 @@ def calc_heat_w_e(df1,df2):
     t_net=40-df2['Water_in'][0]
 
     #calculate energy to heat up hot water:
-    for row in df1.iterrows():
-        df1['Water(kW)'] = df1['Hot Water @ 40 C'] * t_net*4.186
+    df1['Water(kW)'] = df1['Hot Water @ 40 C'] * t_net*4.186
     return df1
 
 def electricity_consumption(df1, df2):
@@ -195,6 +194,7 @@ def electricity_consumption(df1, df2):
 #    return df1
 
 def energy_supply():
+    #Ändra så att denna läser maskinerna som kommer användas och kan plocka t.ex. den bästa härifrån
 
     Technologies={
     'Solar':
@@ -217,16 +217,7 @@ def energy_supply():
 
 def tot_energy_heating(df1, df2):
     print("Entered tot_energy_heating function")
+
     OHPH = 100 #kWh, Occupation_heat_per_hour
-
     df1['Heat_e'] = df1['%AreaHeatingCooling']/100 * df2['Area (m2)'][0] - df1['Occupation'] * OHPH
-
-    print(df1['Heat_e'])
-        #print("areaheatcool",df1['%AreaHeatingCooling'])
-        #print("area",df2['Area (m2)'])
-        #print("occupation",df1['Occupation'])
-
-
-
-    print("calculated heating needed is: ", df1['Heat_e'])
     return df1
