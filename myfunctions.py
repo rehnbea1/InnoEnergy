@@ -7,8 +7,7 @@ from tkinter.ttk import *
 from tkinter import filedialog as fd
 from tkinter import messagebox
 import pandas as pd
-#import math
-import numpy as np
+
 import matplotlib.pyplot as plt
 
 
@@ -105,6 +104,7 @@ def House(gui, df1, df2):
 #Length(m)	Depth(m)	Height(m)	Uwalls(W/m2K)	Uwindows(W/m2K)	Awindow/Awall	Air Changes/hour (h^-1)	Tinside(ºC)	Twaterin(ºC)	Qpeople(W)	Window Solar Gain	Height Lights (m)
 #10	5	3	1	2	0.2	0.5	2	20	120	0.25	1.May
 
+
     print("df1",df1)
     print("df2",df2)
 
@@ -124,7 +124,6 @@ def House(gui, df1, df2):
 
     df2 = Add_par(df2, {'heat_loss_radiation W':heat_loss_radiation})
 
-
     print(df2)
     df1 = HLC(df1, df2, heat_loss_radiation)
     df1 = calc_heat_w_e(df1, df2)
@@ -140,7 +139,7 @@ def House(gui, df1, df2):
     #print(df2.describe())
     print("Data1",df1)
     print("data2",df2)
-    return
+    return df1, df2
 
 
 def HLC(df1,df2, heat_loss_radiation):
@@ -150,11 +149,8 @@ def HLC(df1,df2, heat_loss_radiation):
     temp_in = df2['Tinside(ºC)'][0]
 
     df1['DeltaT (°C)'] = df1['Temp']-temp_in
-
     df1['H_loss (kW)'] = df1['DeltaT (°C)']*heat_loss_radiation[0]/1000
     return df1
-
-
 
 def Add_par(df2,static_values):
     #Function adds the static arguments from House function

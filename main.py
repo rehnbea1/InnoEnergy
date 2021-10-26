@@ -1,6 +1,7 @@
 #fil för att skriva python kod
 
 import myfunctions
+import mymanagement
 import tkinter as tk
 from tkinter import *
 from tkinter.ttk import *
@@ -33,6 +34,7 @@ def main():
         DATA2 = myfunctions.Read_file2("/Users/albertrehnberg/Downloads/Static_Data.csv",gui)
         House_data = myfunctions.House(gui,DATA1,DATA2)
 
+        management =mymanagement.main_action(House_data[0],House_data[1])
 
 
         #HALVFÄRDIGT STUFF
