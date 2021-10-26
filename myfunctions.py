@@ -120,6 +120,7 @@ def House(gui, df1, df2):
 
     df1 = HLC(df1, df2, heat_loss_radiation)
     df1 = calc_heat_w_e(df1, df2)
+    df1 = electricity_consumption(df1, df2)
     #Dessa två ger en massa intressant statistik osv
     #print(df1.describe())
     #print(df2.describe())
@@ -146,14 +147,36 @@ def Add_par(df2,static_values):
 
     return df2
 
-
 def calc_heat_w_e(df1,df2):
     print("entered heat water energy calculator")
     #funktion för att hitta temperaturen ur headern här?
-    t_net=float(40-df2['Water_in'][0])
-    print("t_net", t_net)
+    t_net=40-df2['Water_in'][0]
 
     #calculate energy to heat up hot water:
     for row in df1.iterrows():
-        df1['Water(kW)'] = df1['Hot Water L at 40º'] * float(t_net)*float(4.186)
+        df1['Water(kW)'] = df1['Hot Water L at 40º'] * t_net*4.186
     return df1
+
+def electricity_consumption(df1, df2):
+    A = []
+    for row in df1['Electrical Applainces (kWh)']:
+        row=row.replace(',','.')
+        row = float(row)
+        print(row)
+        A.append(row)
+    print("A", A)
+#    i = 0
+    #for row in df1.iterrows():
+    df1['2.Electrical Applainces (kWh)'] = A
+#        i+=1
+
+    df1 = df1.drop(columns= ['Electrical Applainces (kWh)'])
+    print(df1)
+
+    #df1['Cooking (MJ)'] = (df1['Cooking (MJ)']/3.6)
+    #for row in df1.iterrows():
+    #    print("df1['Cooking (MJ)']", type(df1['Cooking (MJ)']))
+    #    print("df1['Electrical Applainces(kWh)']", type(df1['Electrical Applainces (kWh)']))
+    #    df1['El.energy (kwh)'] = df1['Cooking (MJ)']+df1['Electrical Applainces (kWh)']
+
+    #print(df1)
