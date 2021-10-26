@@ -33,7 +33,7 @@ def Select_file(gui):
 
 def Read_file2(filename,gui):
 
-    file = pd.read_csv(filename)
+    file = pd.read_csv(filename, sep=';')
     return file
     #try:
 
@@ -102,28 +102,28 @@ def show_data(gui,data):
 def House(gui, df1, df2):
     print("Entered: House function")
 
-#Data1     Hour  Temp (ºC)  Wind speed  Rad\n (W/m2)  Occupation  Lighting (Lux) %Total Area Lighting %AreaHeatingCooling  Hot Water L at 40º  Cooking (MJ) Electrical Applainces (kWh)
-#0      0      10.24        6.57          0.00           3               0                    0                 25%                   0             0
+#Length(m)	Depth(m)	Height(m)	Uwalls(W/m2K)	Uwindows(W/m2K)	Awindow/Awall	Air Changes/hour (h^-1)	Tinside(ºC)	Twaterin(ºC)	Qpeople(W)	Window Solar Gain	Height Lights (m)
+#10	5	3	1	2	0.2	0.5	2	20	120	0.25	1.May
 
-
-    #DATA 2 Length (m)  Depth (m)  Height (m)  UWalls (W/(m^2K)  UWindows (W/(m^2K)  Awindow/Awall ratio  Air Changes per Hour (h^-1)  Tinside (ÂºC)  Qpeople (W)  Window Solar Gain  Height Lights (m)
-#0          10          5           3                 1                   2                  0.2                          0.5              2          120               0.25                1.5
+    print("df1",df1)
+    print("df2",df2)
 
     #funktion för att insert flera static values här?
     Static_values = {'Uvalue_roof' : 0.08,'Uvalue_floor': 0.14,'Water_in':20}
 
-    Area = (df2['Length (m)']*df2['Depth (m)'])*2 + (df2['Length (m)']*df2['Height (m)'])*4
-    Volume = df2['Length (m)']*df2['Depth (m)']*df2['Height (m)']
-    WindowA = Area - ((df2['Length (m)']*df2['Height (m)'])*4) * df2['Awindow/Awall ratio']
-    RnF =df2['Length (m)']*df2['Depth (m)']
+    Area    =   df2['Length(m)']*df2['Depth(m)']*2 + df2['Length(m)']*df2['Height(m)']*4
+    Volume  =   df2['Length(m)']*df2['Depth(m)']*df2['Height(m)']
+    WindowA =   Area - ((df2['Length(m)']*df2['Height(m)'])*4) * df2['Awindow/Awall']
+    RnF     =   df2['Length(m)']*df2['Depth(m)']
 
     Static_values = {'Uvalue_roof' : 0.08,'Uvalue_floor': 0.14,'Water_in':20, 'Area (m2)':Area,'Volume (m3)':Volume,'WindowA (m2)':WindowA,'RnF (m2)':RnF}
     #Static_values = {'Uvalue_roof' : 0.08,'Uvalue_floor': 0.14,'Water_in':20,'Area':Area,'Volume':Volume, 'WindowA':WindowA, 'RnF':RnF, 'heat_loss_radiation': heat_loss_radiation}
     df2 = Add_par(df2, Static_values)
 
-    heat_loss_radiation = df2['Area (m2)'] * df2['UWalls (W/(m^2K)'] + df2['WindowA (m2)'] * df2['UWindows (W/(m^2K)'] + df2['RnF (m2)']* df2['Uvalue_floor'] + df2['RnF (m2)'] *df2['Uvalue_roof']
+    heat_loss_radiation = df2['Area (m2)'] * df2['Uwalls(W/m2K)'] + df2['WindowA (m2)'] * df2['Uwindows(W/m2K)'] + df2['RnF (m2)']* df2['Uvalue_floor'] + df2['RnF (m2)'] *df2['Uvalue_roof']
 
     df2 = Add_par(df2, {'heat_loss_radiation W':heat_loss_radiation})
+
 
     print(df2)
     df1 = HLC(df1, df2, heat_loss_radiation)
@@ -147,12 +147,14 @@ def HLC(df1,df2, heat_loss_radiation):
     print("Entered function: HLC")
     #Calculate delta T
     #take delta T times U value
-    temp_in = df2['Tinside (ÂºC)'][0]
+    temp_in = df2['Tinside(ºC)'][0]
     for row in df1.iterrows():
-        df1['DeltaT (°C)'] = df1['Temp (ºC)']-temp_in
+        df1['DeltaT (°C)'] = df1['Temp']-temp_in
     for row in df1.iterrows():
         df1['H_loss (kW)'] = df1['DeltaT (°C)']*heat_loss_radiation[0]/1000
     return df1
+
+
 
 def Add_par(df2,static_values):
     #Function adds the static arguments from House function
@@ -170,28 +172,27 @@ def calc_heat_w_e(df1,df2):
 
     #calculate energy to heat up hot water:
     for row in df1.iterrows():
-        df1['Water(kW)'] = df1['Hot Water L at 40º'] * t_net*4.186
+        df1['Water(kW)'] = df1['Hot Water @ 40 C'] * t_net*4.186
     return df1
 
 def electricity_consumption(df1, df2):
-    df1 = fix_formatting(df1,df2)
+    #df1 = fix_formatting(df1,df2)
 
     df1['Cooking (MJ)'] = (df1['Cooking (MJ)']/3.6)
     df1 = df1.rename(columns={'Cooking (MJ)': 'Cooking (kWh)'})
-    for row in df1.iterrows():
-        df1['El.energy (kwh)'] = df1['Cooking (kWh)']+df1['Electrical Applainces (kWh)']
+    df1['El.energy (kwh)'] = df1['Cooking (kWh)']+df1['Electrical Applainces (kWh)']
 
     return df1
 
-def fix_formatting(df1,df2):
-    A = []
-    for row in df1['Electrical Applainces (kWh)']:
-        row=row.replace(',','.')
-        row = float(row)
-        A.append(row)
-    df1 = df1.drop(columns= ['Electrical Applainces (kWh)'])
-    df1['Electrical Applainces (kWh)'] = A
-    return df1
+#def fix_formatting(df1,df2):
+#    A = []
+#    for row in df1['Electrical Applainces (kWh)']:
+#        row=row.replace(',','.')
+#        row = float(row)
+#        A.append(row)
+#    df1 = df1.drop(columns= ['Electrical Applainces (kWh)'])
+#    df1['Electrical Applainces (kWh)'] = A
+#    return df1
 
 def energy_supply():
 
@@ -215,7 +216,17 @@ def energy_supply():
     return Technologies
 
 def tot_energy_heating(df1, df2):
-    for row in df1.iterrows():
-        #df1['Heat_e'] = df1['%AreaHeatingCooling']
-        pass
+    print("Entered tot_energy_heating function")
+    OHPH = 100 #kWh, Occupation_heat_per_hour
+
+    df1['Heat_e'] = df1['%AreaHeatingCooling']/100 * df2['Area (m2)'][0] - df1['Occupation'] * OHPH
+
+    print(df1['Heat_e'])
+        #print("areaheatcool",df1['%AreaHeatingCooling'])
+        #print("area",df2['Area (m2)'])
+        #print("occupation",df1['Occupation'])
+
+
+
+    print("calculated heating needed is: ", df1['Heat_e'])
     return df1

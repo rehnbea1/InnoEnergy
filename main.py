@@ -24,13 +24,13 @@ def main():
         #file_info = Label(gui, text="Your selection for File_1: "+ file_1)
         #file_info.grid(row = 1, column = 1, pady = 5)
         #DATA = myfunctions.Read_file2(file_1,gui)
-        DATA1 = myfunctions.Read_file2("/Users/albertrehnberg/Downloads/Dynamic_InputFile_Example.csv",gui)
+        DATA1 = myfunctions.Read_file2("/Users/albertrehnberg/Downloads/Dynamic_Data.csv",gui)
 
 
 
         #file2 = Button(gui, text='Browse file_2', command = lambda:myfunctions.Delta2(gui,DATA))
         #file2.grid(row = 2, column = 0, pady =10)
-        DATA2 = myfunctions.Read_file2("/Users/albertrehnberg/Downloads/Static_InputFile_Example.csv",gui)
+        DATA2 = myfunctions.Read_file2("/Users/albertrehnberg/Downloads/Static_Data.csv",gui)
         House_data = myfunctions.House(gui,DATA1,DATA2)
 
 
