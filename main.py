@@ -40,6 +40,7 @@ def main():
         #disp_data.grid(row=3, column = 1)
         #Analysis = Button(gui, text="show graphs", command=lambda:myfunctions.analysis(gui, DATA))
 
+        gui.destroy()
         return
 
 

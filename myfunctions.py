@@ -109,49 +109,51 @@ def House(gui, df1, df2):
     #DATA 2 Length (m)  Depth (m)  Height (m)  UWalls (W/(m^2K)  UWindows (W/(m^2K)  Awindow/Awall ratio  Air Changes per Hour (h^-1)  Tinside (ÂºC)  Qpeople (W)  Window Solar Gain  Height Lights (m)
 #0          10          5           3                 1                   2                  0.2                          0.5              2          120               0.25                1.5
 
-    print("Data1",df1)
-    print("data2",df2)
-    #print("length",df['Length'])
-    #print('height',df['Height'])
-    Static_values = {'Uvalue_roof' : 8/100,'Uvalue_floor': 14/100}
+    #funktion för att insert flera static values här?
+    Static_values = {'Uvalue_roof' : 0.08,'Uvalue_floor': 0.14,'Water_in':20}
     df2 = Add_par(df2, Static_values)
     Area = (df2['Length (m)']*df2['Depth (m)'])*2 + (df2['Length (m)']*df2['Height (m)'])*4
     Volume = df2['Length (m)']*df2['Depth (m)']*df2['Height (m)']
     WindowA = Area - ((df2['Length (m)']*df2['Height (m)'])*4) * df2['Awindow/Awall ratio']
-    heat_loss_radiation = Area * df2['UWalls (W/(m^2K)'] + WindowA * df2['UWindows (W/(m^2K)']
+    RnF = (df2['Length (m)']*df2['Depth (m)'])
+    heat_loss_radiation = Area * df2['UWalls (W/(m^2K)'] + WindowA * df2['UWindows (W/(m^2K)'] + RnF*df2['Uvalue_floor'] + RnF*df2['Uvalue_roof']
 
     df1 = HLC(df1, df2, heat_loss_radiation)
-
-    print(df1.describe())
-    print(df2.describe())
-
+    df1 = calc_heat_w_e(df1, df2)
+    #Dessa två ger en massa intressant statistik osv
+    #print(df1.describe())
+    #print(df2.describe())
+    print("Data1",df1)
+    print("data2",df2)
     return
 
 def HLC(df1,df2,heat_loss_radiation):
-
-    print("HLR",heat_loss_radiation)
+    print("Entered function: HLC")
     #Calculate delta T
     #take delta T times U value
-    print("HLC")
-
     temp_in = df2['Tinside (ÂºC)'][0]
-    print('test',temp_in)
-
     for row in df1.iterrows():
         df1['DeltaT (°C)'] = df1['Temp (ºC)']-temp_in
     for row in df1.iterrows():
         df1['H_loss (kW)'] = df1['DeltaT (°C)']*heat_loss_radiation[0]/1000
-
-    print('uppdaterad df1:')
-    print(df1)
     return df1
 
 def Add_par(df2,static_values):
-        for x in static_values:
-            print("item", x)
-            print("svi", static_values[x])
+    print("entered Add_par")
+    for x in static_values:
 
-            df2[x] = static_values[x]
+        df2[x] = static_values[x]
 
-        print(df2)
-        return df2
+    return df2
+
+
+def calc_heat_w_e(df1,df2):
+    print("entered heat water energy calculator")
+    #funktion för att hitta temperaturen ur headern här?
+    t_net=float(40-df2['Water_in'][0])
+    print("t_net", t_net)
+
+    #calculate energy to heat up hot water:
+    for row in df1.iterrows():
+        df1['Water(kW)'] = df1['Hot Water L at 40º'] * float(t_net)*float(4.186)
+    return df1
