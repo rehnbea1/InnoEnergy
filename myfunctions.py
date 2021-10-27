@@ -104,9 +104,10 @@ def House(gui, df1, df2):
 #Length(m)	Depth(m)	Height(m)	Uwalls(W/m2K)	Uwindows(W/m2K)	Awindow/Awall	Air Changes/hour (h^-1)	Tinside(ºC)	Twaterin(ºC)	Qpeople(W)	Window Solar Gain	Height Lights (m)
 #10	5	3	1	2	0.2	0.5	2	20	120	0.25	1.May
 
-
-    print("df1",df1)
-    print("df2",df2)
+    print("df1")
+    print(df1)
+    print("df2")
+    print(df2)
 
     #funktion för att insert flera static values här?
     Static_values = {'Uvalue_roof' : 0.08,'Uvalue_floor': 0.14,'Water_in':20}
@@ -116,7 +117,20 @@ def House(gui, df1, df2):
     WindowA =   Area - ((df2['Length(m)']*df2['Height(m)'])*4) * df2['Awindow/Awall']
     RnF     =   df2['Length(m)']*df2['Depth(m)']
 
-    Static_values = {'Uvalue_roof' : 0.08,'Uvalue_floor': 0.14,'Water_in':20, 'Area (m2)':Area,'Volume (m3)':Volume,'WindowA (m2)':WindowA,'RnF (m2)':RnF}
+    Static_values = {
+    'Uvalue_roof' : 0.08,
+    'Uvalue_floor': 0.14,
+    'Area (m2)':Area,
+    'Volume (m3)':Volume,
+    'WindowA (m2)':WindowA,
+    'RnF (m2)':RnF,
+    'null_heat': "none",
+    'nuclear_e': True,
+    'ground_e': True,
+    'Wind_e': False,
+    'solar_e':True
+
+    }
     #Static_values = {'Uvalue_roof' : 0.08,'Uvalue_floor': 0.14,'Water_in':20,'Area':Area,'Volume':Volume, 'WindowA':WindowA, 'RnF':RnF, 'heat_loss_radiation': heat_loss_radiation}
     df2 = Add_par(df2, Static_values)
 
@@ -124,21 +138,25 @@ def House(gui, df1, df2):
 
     df2 = Add_par(df2, {'heat_loss_radiation W':heat_loss_radiation})
 
-    print(df2)
+
     df1 = HLC(df1, df2, heat_loss_radiation)
     df1 = calc_heat_w_e(df1, df2)
     df1 = electricity_consumption(df1, df2)
     #df1 = electricity_demand(df1, df2)
     df1 = tot_energy_heating(df1, df2)
+    df1 = solar_heat(df1, df2)
+    df1 = solar_electricity(df1,df2)
 
 
-    print("stat_V",Static_values)
-    ES = energy_supply()
+
+
     #Dessa två ger en massa intressant statistik osv
     #print(df1.describe())
     #print(df2.describe())
-    print("Data1",df1)
-    print("data2",df2)
+    print("–––––Data1–––––")
+    print(df1)
+    print("-----data2-----")
+    print(df2)
     return df1, df2
 
 
@@ -164,7 +182,7 @@ def Add_par(df2,static_values):
 def calc_heat_w_e(df1,df2):
     print("entered heat water energy calculator")
     #funktion för att hitta temperaturen ur headern här?
-    t_net=40-df2['Water_in'][0]
+    t_net=40-df2['Twaterin(ºC)'][0]
 
     #calculate energy to heat up hot water:
     df1['Water(kW)'] = df1['Hot Water @ 40 C'] * t_net*4.186
@@ -189,35 +207,42 @@ def electricity_consumption(df1, df2):
 #    df1['Electrical Applainces (kWh)'] = A
 #    return df1
 
-def energy_supply():
+def energy_supply(crit1, crit2):
     #Ändra så att denna läser maskinerna som kommer användas och kan plocka t.ex. den bästa härifrån
 
-    Technologies={
-    'Solar':
-    {'name': 'Savosolar SALO® 305-315W MONO',
-    'power (W)' : 310,
-    'area m2': 1.622912,
-    'efficiency':0.191,
-    'price': 1000
-    },
-    'thermal solar':{
-    'name': 'Bosch',
-    'tank_size (L)': 120,
-    'efficiency':0.95,
-    'price':1566,
-      },
+    print("Ändra så att denna läser maskinerna som kommer användas och kan plocka t.ex. den bästa härifrån")
 
-     }
-
-    return Technologies
+    return 0,95
 
 def tot_energy_heating(df1, df2):
     print("Entered tot_energy_heating function")
     OHPH = 100 #Wh, Occupation_heat_per_hour
-    df1['Heat_e (Wh)'] = ((df1['%AreaHeatingCooling']/100 * df2['Area (m2)'][0] - df1['Occupation'] * OHPH) /1000)-df1['H_loss (kW)']
+    df1['Heat_e (kWh)'] = ((df1['%AreaHeatingCooling']/100 * df2['Area (m2)'][0] - df1['Occupation'] * OHPH) /1000)-df1['H_loss (kW)']
 
-    df1.loc[df1['Occupation'] == 0, 'Heat_e (Wh)'] = 'm'
-
+    df1.loc[df1['Occupation'] == 0, 'Heat_e (kWh)'] = df2['null_heat'][0]
 
     print(df1)
+    return df1
+
+
+def solar_heat(df1,df2):
+
+    #changes to be made still
+    #panel_efficciency = energy_supply('solar_heat','efficiency')
+    panel_efficiency = 0.95
+    #changes to be made
+    df1['sol_h_prod'] = df1['Rad (W/m^2)'] * 0.5 * df2['RnF (m2)'][0] * panel_efficiency
+
+    print(df1['sol_h_prod'])
+    return df1
+
+def solar_electricity(df1,df2):
+
+    #changes to be made still
+    #panel_efficciency = energy_supply('solar_heat','efficiency')
+    panel_efficiency = 0.19
+    #changes to be made
+    df1['sol_e_product'] = df1['Rad (W/m^2)'] * 0.5 * df2['RnF (m2)'][0] * panel_efficiency
+
+    print(df1['sol_e_product'])
     return df1

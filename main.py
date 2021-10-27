@@ -49,11 +49,7 @@ def main():
 
 
     #Denna gör att filläsningsfunktionen kallas
-    file1 = Button(gui, text='Browse file_1', command = Delta1)
-
-
-    file1.grid(row = 1, column = 0, pady=10)
-
+    file1 = Button(gui, text='Browse file_1', command = Delta1).grid(row = 1, column = 0, pady=10)
 
     #my_label.pack()
     #file1.pack()
