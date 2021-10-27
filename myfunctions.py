@@ -213,7 +213,11 @@ def energy_supply():
 
 def tot_energy_heating(df1, df2):
     print("Entered tot_energy_heating function")
+    OHPH = 100 #Wh, Occupation_heat_per_hour
+    df1['Heat_e (Wh)'] = ((df1['%AreaHeatingCooling']/100 * df2['Area (m2)'][0] - df1['Occupation'] * OHPH) /1000)-df1['H_loss (kW)']
 
-    OHPH = 100 #kWh, Occupation_heat_per_hour
-    df1['Heat_e'] = df1['%AreaHeatingCooling']/100 * df2['Area (m2)'][0] - df1['Occupation'] * OHPH
+    df1.loc[df1['Occupation'] == 0, 'Heat_e (Wh)'] = 'm'
+
+
+    print(df1)
     return df1
