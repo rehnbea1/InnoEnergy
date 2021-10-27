@@ -124,7 +124,7 @@ def House(gui, df1, df2):
     'Volume (m3)':Volume,
     'WindowA (m2)':WindowA,
     'RnF (m2)':RnF,
-    'null_heat': "none",
+    'null_heat': 0,
     'nuclear_e': True,
     'ground_e': True,
     'Wind_e': False,
@@ -217,13 +217,51 @@ def energy_supply(crit1, crit2):
 def tot_energy_heating(df1, df2):
     print("Entered tot_energy_heating function")
     OHPH = 100 #Wh, Occupation_heat_per_hour
-    df1['Heat_e (kWh)'] = ((df1['%AreaHeatingCooling']/100 * df2['Area (m2)'][0] - df1['Occupation'] * OHPH) /1000)-df1['H_loss (kW)']
+
+
+    air_losses = calculate_air_heat_losses(df1,df2)
+
+    df1['Heat_e (kWh)'] = ((df1['%AreaHeatingCooling']/100 * df2['Area (m2)'][0] - df1['Occupation'] * OHPH) /1000)-df1['H_loss (kW)'] - air_losses
 
     df1.loc[df1['Occupation'] == 0, 'Heat_e (kWh)'] = df2['null_heat'][0]
 
     print(df1)
     return df1
 
+def calculate_air_heat_losses(df1,df2):
+    Volume_per_hour = df2['Air Changes/hour (h^-1)'][0] * df2['Volume (m3)'][0]
+    list = []
+    Air_heat_capacity = 1.012/1000 #*10^-3 kJ/kgK
+    thermal_recovery = 0.8 #%of heat
+    Air_density = 1.2
+
+    for index, row in df1.iterrows():
+        delta_t = abs(df2['Tinside(ºC)'][0] - row['Temp'])
+
+        Air_heating = Volume_per_hour * (1-thermal_recovery) * delta_t * Air_heat_capacity * Air_density
+
+        list.append(Air_heating)
+    return list
+
+def lighting_consumtion(df1,df2):
+
+    #energy_supply(lighting,... )
+    efficiency = 0.7
+    selected_watt = 0
+    sel_lumen = 60
+
+
+    lumens = df1['Lighting (lux)']*(df2['Height Lights (m)'][0])**2
+    A = lumens/df1['Total lapms'] #gives lumen demand per light bulb
+    lum_max = A.max()
+    #search for lightbulb with minimum Amax lumens
+    #E_consumption =
+
+    #b = A.max() is the highest required llumen for a lightbulb durring the day <-search for this one
+
+
+    #read from excel lightbulbs that have the required lumen
+    return df1
 
 def solar_heat(df1,df2):
 
@@ -231,9 +269,9 @@ def solar_heat(df1,df2):
     #panel_efficciency = energy_supply('solar_heat','efficiency')
     panel_efficiency = 0.95
     #changes to be made
-    df1['sol_h_prod'] = df1['Rad (W/m^2)'] * 0.5 * df2['RnF (m2)'][0] * panel_efficiency
+    df1['sol_h_prod (kWh)'] = df1['Rad (W/m^2)'] * 0.5 * df2['RnF (m2)'][0] * panel_efficiency/1000
 
-    print(df1['sol_h_prod'])
+
     return df1
 
 def solar_electricity(df1,df2):
@@ -242,7 +280,7 @@ def solar_electricity(df1,df2):
     #panel_efficciency = energy_supply('solar_heat','efficiency')
     panel_efficiency = 0.19
     #changes to be made
-    df1['sol_e_product'] = df1['Rad (W/m^2)'] * 0.5 * df2['RnF (m2)'][0] * panel_efficiency
+    df1['sol_e_product (kWh)'] = df1['Rad (W/m^2)'] * 0.5 * df2['RnF (m2)'][0] * panel_efficiency/1000
 
-    print(df1['sol_e_product'])
+
     return df1
