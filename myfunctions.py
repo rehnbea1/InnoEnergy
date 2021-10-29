@@ -155,7 +155,7 @@ def House(gui, df1, df2):
     #Dessa två ger en massa intressant statistik osv
     #print(df1.describe())
     #print(df2.describe())
-    
+
     return df1, df2
 
 
@@ -283,7 +283,7 @@ def solar_electricity(df1,df2):
     return df1
 
 
-def storage(df1,df2):
+def H_storage(df1,df2):
 
         storage = {}
 
