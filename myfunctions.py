@@ -33,7 +33,9 @@ def Select_file(gui):
 def Read_file2(filename,gui):
 
     file = pd.read_csv(filename, sep=';')
+    print("what type is this?", type(file))
     return file
+
     #try:
 
     #except FileNotFoundError:
@@ -146,7 +148,7 @@ def House(gui, df1, df2):
     df1 = tot_energy_heating(df1, df2)
     df1 = solar_heat(df1, df2)
     df1 = solar_electricity(df1,df2)
-
+    df1['storage'] = 0
 
 
 
@@ -282,5 +284,14 @@ def solar_electricity(df1,df2):
     #changes to be made
     df1['sol_e_product (kWh)'] = df1['Rad (W/m^2)'] * 0.5 * df2['RnF (m2)'][0] * panel_efficiency/1000
 
-
     return df1
+
+
+def storage(df1,df2,x):
+    pass
+#    if x > 0:
+
+    #    storage = df1['storage']+x
+    #    df1.loc[df1['storage']] = df1['storage']+x
+
+#    return storage, df1
