@@ -34,7 +34,7 @@ def main():
         DATA2 = myfunctions.Read_file2("/Users/albertrehnberg/Downloads/Static_Data.csv",gui)
         House_data = myfunctions.House(gui,DATA1,DATA2)
 
-        management =mymanagement.main_action(House_data[0],House_data[1])
+        management = mymanagement.main_action(House_data[0],House_data[1])
 
 
         #HALVFÄRDIGT STUFF
@@ -42,7 +42,10 @@ def main():
         #disp_data.grid(row=3, column = 1)
         #Analysis = Button(gui, text="show graphs", command=lambda:myfunctions.analysis(gui, DATA))
 
-
+        print("–––––Data1–––––")
+        print(management[0])
+        print("-----data2-----")
+        print(management[1])
         #stänger fönstret automatiskt nu
         gui.destroy()
         return

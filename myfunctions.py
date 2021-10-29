@@ -155,10 +155,7 @@ def House(gui, df1, df2):
     #Dessa två ger en massa intressant statistik osv
     #print(df1.describe())
     #print(df2.describe())
-    print("–––––Data1–––––")
-    print(df1)
-    print("-----data2-----")
-    print(df2)
+    
     return df1, df2
 
 
@@ -227,7 +224,6 @@ def tot_energy_heating(df1, df2):
 
     df1.loc[df1['Occupation'] == 0, 'Heat_e (kWh)'] = df2['null_heat'][0]
 
-    print(df1)
     return df1
 
 def calculate_air_heat_losses(df1,df2):
@@ -287,11 +283,55 @@ def solar_electricity(df1,df2):
     return df1
 
 
-def storage(df1,df2,x):
-    pass
-#    if x > 0:
+def storage(df1,df2):
 
-    #    storage = df1['storage']+x
-    #    df1.loc[df1['storage']] = df1['storage']+x
+        storage = {}
 
-#    return storage, df1
+        storage['energy_shortage (kWh)'] = df1['Heat_e (kWh)']+df1['sol_h_prod (kWh)']
+
+        #print(Storage['Demand (kWh)'][x])
+
+        place_holder = []
+        place_holder.append(0)
+        #print("range",range(len(storage['Demand (kWh)'])))
+        for x in range(len(storage['energy_shortage (kWh)'])):
+
+            A = storage['energy_shortage (kWh)'][x]
+            B = df1['storage'][x]
+            C = B+A
+
+            if  C > 0:
+                #adds value to storage
+            #    print("PH minus1",place_holder[-1])
+                c = place_holder[-1]+C
+            #    print("this is smol C", c)
+                place_holder.append(c)
+            #    print("PH+",place_holder)
+
+            elif C < 0:
+            #    print("c mindre än noll")
+                #withdraws maximum amount from storage
+                if place_holder[-1] > 0:
+            #        print("PH-1",place_holder)
+                    D = place_holder[-1]+C
+                    if D > 0:
+            #            print("PH-2",place_holder)
+                        place_holder.append(D)
+                    elif D < 0 :
+                        place_holder.append(0)
+            #            print("more power still needed, this much is left: ", D)
+                elif place_holder[-1] < 0:
+                    place_holder.append(0)
+            #        print("placeholder index is smaller than 0?")
+                    pass
+                elif place_holder[-1] == 0:
+                    place_holder.append(0)
+                    pass
+            else:
+
+                place_holder.append(0) == 0
+            #print("place_holder", place_holder)
+        place_holder.pop(0)
+        df1['storage'] = place_holder
+
+        return df1
