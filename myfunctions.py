@@ -8,8 +8,43 @@ from tkinter import filedialog as fd
 from tkinter import messagebox
 import pandas as pd
 
-import matplotlib.pyplot as plt
+def Delta1():
+        #Ta fram efter testning!!!!!
+        #file_1 = myfunctions.Select_file(gui)
+        #file_1 = myfunctions.Check_file(file_1,gui)
+        #file_info = Label(gui, text="Your selection for File_1: "+ file_1)
+        #file_info.grid(row = 1, column = 1, pady = 5)
+        #DATA = myfunctions.Read_file2(file_1,gui)
+        DATA1 = myfunctions.Read_file2("/Users/albertrehnberg/Downloads/Dynamic_Data.csv",gui)
 
+
+
+        #file2 = Button(gui, text='Browse file_2', command = lambda:myfunctions.Delta2(gui,DATA))
+        #file2.grid(row = 2, column = 0, pady =10)
+        DATA2 = myfunctions.Read_file2("/Users/albertrehnberg/Downloads/Static_Data.csv",gui)
+        House_data = myfunctions.House(gui,DATA1,DATA2)
+
+        management = mymanagement.main_action(House_data[0],House_data[1])
+
+
+        #HALVFÄRDIGT STUFF
+        #disp_data = Button(gui, text='Display data', command = lambda: myfunctions.show_data(gui,DATA))
+        #disp_data.grid(row=3, column = 1)
+        #Analysis = Button(gui, text="show graphs", command=lambda:myfunctions.analysis(gui, DATA))
+
+        print("–––––Data1–––––")
+        print(management[0])
+        print("-----data2-----")
+        print(management[1])
+
+
+
+        #stänger fönstret automatiskt nu
+
+
+
+        #gui.destroy()
+        return
 
 #def Delta2(gui, DATA1):
     #file_2 = Select_file(gui)
@@ -25,15 +60,15 @@ import matplotlib.pyplot as plt
     #House_data = Button(gui, text="calculate house data", command = lambda:House(gui,DATA1,DATA2)).grid(row=3, column = 0)
     #House_data = House(gui,DATA1,DATA2)
 
-def Select_file(gui):
+def select_file(gui):
     filetypes = (('csv-files', '*.csv'),('All files', '*.*'))
     filename = fd.askopenfilename(title='Open a file',initialdir='downloads/',filetypes=filetypes)
     return filename
 
-def Read_file2(filename,gui):
+def read_file2(filename,gui):
 
     file = pd.read_csv(filename, sep=';')
-    print("what type is this?", type(file))
+    print("Entered: Read_file_2")
     return file
 
     #try:
@@ -148,8 +183,6 @@ def House(gui, df1, df2):
     df1 = tot_energy_heating(df1, df2)
     df1 = solar_heat(df1, df2)
     df1 = solar_electricity(df1,df2)
-    df1['storage'] = 0
-
 
 
     #Dessa två ger en massa intressant statistik osv
@@ -284,7 +317,8 @@ def solar_electricity(df1,df2):
 
 
 def H_storage(df1,df2):
-
+        print("entered heat_storage")
+        df1['Heat_storage'] = 0
         storage = {}
 
         storage['energy_shortage (kWh)'] = df1['Heat_e (kWh)']+df1['sol_h_prod (kWh)']
@@ -297,7 +331,7 @@ def H_storage(df1,df2):
         for x in range(len(storage['energy_shortage (kWh)'])):
 
             A = storage['energy_shortage (kWh)'][x]
-            B = df1['storage'][x]
+            B = df1['Heat_storage'][x]
             C = B+A
 
             if  C > 0:
@@ -332,6 +366,18 @@ def H_storage(df1,df2):
                 place_holder.append(0) == 0
             #print("place_holder", place_holder)
         place_holder.pop(0)
-        df1['storage'] = place_holder
+        df1['Heat_storage'] = place_holder
+
+        df1['Heat_storage'].plot()
 
         return df1
+
+
+
+
+
+#class Get_file(self, df1,df2):
+
+#    def __init__(self,parent, controller):
+#        self.file1 = df1
+#        self.file2 = df2
