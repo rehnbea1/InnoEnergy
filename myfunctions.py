@@ -8,43 +8,8 @@ from tkinter import filedialog as fd
 from tkinter import messagebox
 import pandas as pd
 
-def Delta1():
-        #Ta fram efter testning!!!!!
-        #file_1 = myfunctions.Select_file(gui)
-        #file_1 = myfunctions.Check_file(file_1,gui)
-        #file_info = Label(gui, text="Your selection for File_1: "+ file_1)
-        #file_info.grid(row = 1, column = 1, pady = 5)
-        #DATA = myfunctions.Read_file2(file_1,gui)
-        DATA1 = myfunctions.Read_file2("/Users/albertrehnberg/Downloads/Dynamic_Data.csv",gui)
 
 
-
-        #file2 = Button(gui, text='Browse file_2', command = lambda:myfunctions.Delta2(gui,DATA))
-        #file2.grid(row = 2, column = 0, pady =10)
-        DATA2 = myfunctions.Read_file2("/Users/albertrehnberg/Downloads/Static_Data.csv",gui)
-        House_data = myfunctions.House(gui,DATA1,DATA2)
-
-        management = mymanagement.main_action(House_data[0],House_data[1])
-
-
-        #HALVFÄRDIGT STUFF
-        #disp_data = Button(gui, text='Display data', command = lambda: myfunctions.show_data(gui,DATA))
-        #disp_data.grid(row=3, column = 1)
-        #Analysis = Button(gui, text="show graphs", command=lambda:myfunctions.analysis(gui, DATA))
-
-        print("–––––Data1–––––")
-        print(management[0])
-        print("-----data2-----")
-        print(management[1])
-
-
-
-        #stänger fönstret automatiskt nu
-
-
-
-        #gui.destroy()
-        return
 
 #def Delta2(gui, DATA1):
     #file_2 = Select_file(gui)
@@ -65,12 +30,19 @@ def select_file(gui):
     filename = fd.askopenfilename(title='Open a file',initialdir='downloads/',filetypes=filetypes)
     return filename
 
-def read_file2(filename,gui):
+def read_file(filename,gui):
 
     file = pd.read_csv(filename, sep=';')
-    print("Entered: Read_file_2")
+    #fucked up csv reader because formatting
+
+    print("Entered: Read_file")
     return file
 
+def read_file2(gui, filename):
+    #For files without ; delimiter (normal csv)
+    file = pd.read_csv(filename)
+    print("Entered: Read_file2")
+    return file
     #try:
 
     #except FileNotFoundError:
@@ -141,10 +113,11 @@ def House(gui, df1, df2):
 #Length(m)	Depth(m)	Height(m)	Uwalls(W/m2K)	Uwindows(W/m2K)	Awindow/Awall	Air Changes/hour (h^-1)	Tinside(ºC)	Twaterin(ºC)	Qpeople(W)	Window Solar Gain	Height Lights (m)
 #10	5	3	1	2	0.2	0.5	2	20	120	0.25	1.May
 
-    print("df1")
-    print(df1)
-    print("df2")
-    print(df2)
+    #print("df1")
+    #print(df1)
+    #print("df2")
+    #print(df2)
+    print("df1 & df2 read correctly")
 
     #funktion för att insert flera static values här?
     Static_values = {'Uvalue_roof' : 0.08,'Uvalue_floor': 0.14,'Water_in':20}
@@ -229,16 +202,6 @@ def electricity_consumption(df1, df2):
 
     return df1
 
-#def fix_formatting(df1,df2):
-#    A = []
-#    for row in df1['Electrical Applainces (kWh)']:
-#        row=row.replace(',','.')
-#        row = float(row)
-#        A.append(row)
-#    df1 = df1.drop(columns= ['Electrical Applainces (kWh)'])
-#    df1['Electrical Applainces (kWh)'] = A
-#    return df1
-
 def energy_supply(crit1, crit2):
     #Ändra så att denna läser maskinerna som kommer användas och kan plocka t.ex. den bästa härifrån
 
@@ -276,6 +239,7 @@ def calculate_air_heat_losses(df1,df2):
 
 def lighting_consumtion(df1,df2):
 
+
     #energy_supply(lighting,... )
     efficiency = 0.7
     selected_watt = 0
@@ -289,7 +253,6 @@ def lighting_consumtion(df1,df2):
     #E_consumption =
 
     #b = A.max() is the highest required llumen for a lightbulb durring the day <-search for this one
-
 
     #read from excel lightbulbs that have the required lumen
     return df1
@@ -314,7 +277,6 @@ def solar_electricity(df1,df2):
     df1['sol_e_product (kWh)'] = df1['Rad (W/m^2)'] * 0.5 * df2['RnF (m2)'][0] * panel_efficiency/1000
 
     return df1
-
 
 def H_storage(df1,df2):
         print("entered heat_storage")
@@ -370,14 +332,26 @@ def H_storage(df1,df2):
 
         df1['Heat_storage'].plot()
 
-        return df1
+        return df1, df2
+
+def test(gui, current_file1, current_file2):
+
+    Lab1 = Label(gui, text = current_file1).grid(row = 6)
+    Lab2 = Label(gui, text = current_file2).grid(row = 7)
+    return
+
+def import_databases(gui):
+    print("entered import_databases")
+    storage = pd.read_excel('/Users/albertrehnberg/Desktop/projekt/StorageTechnologies Database.xlsx', sheet_name =None)
+    print("storage type", type(storage))
+    conversion = pd.read_excel('/Users/albertrehnberg/Desktop/projekt/Conversion Technologies Database.xlsx', sheet_name =None)
+
+    return conversion, storage
 
 
+def get_graph_options(gui,FILE1, FILE2,DATABASE1,DATABASE2):
+    print("entered get_graph_options")
 
-
-
-#class Get_file(self, df1,df2):
-
-#    def __init__(self,parent, controller):
-#        self.file1 = df1
-#        self.file2 = df2
+    headers = FILE1.headers + FILE2.headers + DATABASE1.headers + DATABASE2.headers
+    print(headers)
+    return headers
