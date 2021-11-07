@@ -14,14 +14,8 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolb
 from matplotlib.figure import Figure
 
 
-FILE1 = None
-FILE2 = None
-DATABASE1 = None
-DATABASE2 = None
 
-
-
-LARGE_FONT = ("Verdana", 12)
+LARGE_FONT = ("Verdana", 8)
 
 class File:
 
@@ -47,14 +41,16 @@ class Window(tk.Tk):
     def __init__(self, *args, **kwargs):
 
         tk.Tk.__init__(self, *args,**kwargs)
+
         container = tk.Frame(self)
         container.pack(side="top", fill="both",expand= True)
-
         container.grid_rowconfigure(0, weight=1)
         container.grid_columnconfigure(0, weight=1)
+
         self.geometry("120x150")
 
 
+        self.shared_data = {'file1':StringVar(), 'file2': StringVar(), 'DATABASE1': StringVar(), 'DATABASE2':StringVar(), 'options':StringVar()}
 
         self.frames = {}
 
@@ -78,7 +74,17 @@ class StartPage(tk.Frame):
         label = tk.Label(self,text="StartPage", font= LARGE_FONT)
         label.grid(row=0,pady=10)
 
-        destroy = Button(self,text="testknapp", command = lambda: gui.destroy()).grid(row=4)
+
+        self.file1 = controller.shared_data['file1']
+        self.file2 = controller.shared_data['file2']
+        self.DATABASE1 = controller.shared_data['DATABASE1']
+        self.DATABASE2 = controller.shared_data['DATABASE2']
+        self.options = controller.shared_data['options']
+
+
+        #controller.shared_data.update({'options':options})
+
+
 
         file1 = Button(self, text='Browse file_1',
                         command = lambda: self.Delta1()).grid(row = 1)
@@ -88,6 +94,11 @@ class StartPage(tk.Frame):
 
         Graph_page = Button(self, text="GraphPage",
                         command = lambda: controller.show_frame(GraphPage)).grid(row = 4)
+
+        destroy = Button(self,text="testknapp",
+                        command = lambda: gui.destroy()).grid(row=5)
+
+
 
     def Delta1(self):
 
@@ -115,6 +126,9 @@ class StartPage(tk.Frame):
         #Analysis = Button(gui, text="show graphs", command=lambda:myfunctions.analysis(gui, DATA))
 
         #stänger fönstret automatiskt nu
+
+        files  = [df[0],df[1],DATABASES[0],DATABASES[1]]
+
         FILE1 = File(df[0])
 
         FILE2 = File(df[1])
@@ -123,8 +137,45 @@ class StartPage(tk.Frame):
 
         DATABASE2 = File(DATABASES[1])
 
-        management = myfunctions.get_graph_options(gui,FILE1,FILE2, DATABASE1,DATABASE2)
 
+
+        #print("–––––FILE1–––––")
+        #print(FILE1.file)
+        #print("–––––FILE2–––––")
+        #print(FILE2.file)
+        #print("–––––DATABASE1–––––")
+        #print(DATABASE1.file)
+        #print("–––––DATABASE2–––––")
+        #print(DATABASE2.file)
+
+        print(FILE1.file.columns)
+        options = myfunctions.get_graph_options(FILE1,FILE2, DATABASE1,DATABASE2)
+
+
+        self.file1.set(FILE1.file)
+        self.file2.set(FILE2.file)
+        self.DATABASE1.set(DATABASE1.file)
+        self.DATABASE2.set(DATABASE2.file)
+        self.options.set(options)
+
+
+        #button2 = Button(self,text="press", command = self.show).grid(row=11)
+
+
+        clicked = StringVar()
+        clicked.set("Select item")
+        drop = OptionMenu(self, clicked, *options).grid(row=6, column = 0)
+        mybutton = Button(self,text ='selection', command = lambda: StartPage.show(clicked)).grid(row=6,column =1)
+
+
+        method = StringVar()
+        list = ["energy","Other","Cost2"]
+        drop = OptionMenu(self, method, *list).grid(row=7,column=0)
+        confirm = Button(self, text= "confirm", command = lambda : self.display(method,files)).grid(row=7,column=1)
+
+
+        #Graph_page = Button(self, text="GraphPage",
+        #                command = lambda: Window.show_frame(self,GraphPage)).grid(row = 4)
         #print("–––––FILE1–––––")
         #print(FILE1.file)
         #print("–––––FILE2–––––")
@@ -133,7 +184,6 @@ class StartPage(tk.Frame):
         #p#rint(DATABASE1)
         #print("–––––DATABASE2–––––")
         #print(DATABASE2)
-
 
         return FILE1, FILE2, DATABASE1, DATABASE2
 
@@ -145,6 +195,67 @@ class StartPage(tk.Frame):
         #my_label.pack()
         #file1.pack()
         #file2.pack()
+    def show(clicked):
+        print(clicked.get())
+        selection1 = clicked.get()
+        return
+
+
+    def show1(self, files, var1,var2,var3,var4,var5):
+
+        textA = Label(self, text = "Wind power: " + str(var1.get())).grid(row=8, column=3)
+        textb = Label(self, text = "Solar PV: " + str(var2.get())).grid(row=9, column=3)
+        textc = Label(self, text = "Solar Heat panels: " + str(var3.get())).grid(row=10, column=3)
+        textd = Label(self, text = "Nuclear: " + str(var4.get())).grid(row=11, column=3)
+        texte = Label(self, text = "Ground heat: " + str(var4.get())).grid(row=11, column=3)
+
+
+
+        #list = {'Wind power': var1.get(), 'Solar PV':var2.get(),'Solar Heat panels':var3.get(),'Nuclear':var4.get()}
+        print(type(list))
+        print(files[1])
+        files[1]['Wind power']= var1.get()
+        files[1]['Solar PV']= var2.get()
+        files[1]['Solar heat panels']= var3.get()
+        files[1]['Nuclear']= var4.get()
+        files[1]['Ground_heat']= var5.get()
+
+        #{'Wind power': var1.get()}, {'Solar PV':var2.get()},{'Solar Heat panels':var3.get()},{'Nuclear':var4.get()})
+        print(files[1])
+    def display(self,method,files):
+
+        print(method.get())
+        selection = method.get()
+
+        self.selection = selection
+
+        var1 = IntVar()
+        var2 = IntVar()
+        var3 = IntVar()
+        var4 = IntVar()
+        var5 = IntVar()
+
+
+        L = Label(self, text="What primary energies are there available?").grid(row = 3, column = 3)
+        wind        = Checkbutton(self, text = "Wind power",        variable = var1).grid(row = 4, column = 3)
+        solar_pv    = Checkbutton(self, text = "Solar PV",          variable = var2).grid(row = 4, column = 4)
+        solar_heat  = Checkbutton(self, text = "Solar Heat panels", variable = var3).grid(row = 5, column = 3)
+        nuclear     = Checkbutton(self, text = "Nuclear",           variable = var4).grid(row = 5, column = 4)
+        Ground_heat = Checkbutton(self, text = "Ground heat",       variable = var5).grid(row = 6, column = 3)
+
+
+
+        print("-----------------------------------")
+
+
+
+
+        Save = Button(self, text = "Save selection", command = lambda: StartPage.show1(self, files,var1,var2,var3,var4, var5)).grid(row = 7, column = 3, pady=10)
+
+        #A = myfunctions.analysis(selection, files)
+
+
+
 
 
 class PageOne(tk.Frame):
@@ -165,16 +276,18 @@ class GraphPage(tk.Frame):
         tk.Frame.__init__(self,parent)
         label = tk.Label(self,text="GraphPage", font= LARGE_FONT)
         label.grid(row=1,pady=10)
+        self.file1 = controller.shared_data['file1']
+        self.file2 = controller.shared_data['file2']
+        self.options = controller.shared_data['options']
+        #tk.Label(self, text = "selected file : ").grid(row=10) # text assigns a permanent value
 
-        Button1 = Button(self, text="Back to Home",command = lambda: controller.show_frame(StartPage)).grid(row = 3)
-        clicked = StringVar()
-        clicked.set("Monday")
 
-        options = Button(self,text= "press me", command = lambda: myfunctions.get_graph_options(FILE1, FILE2,DATABASE1,DATABASE2)).grid(row=4)
-        #drop_down = OptionMenu(self, clicked, *options).pack()
+        button1 = Button(self, text="Back to Home",command = lambda: controller.show_frame(StartPage)).grid(row = 3)
 
-       #myButton  = Button(self, text = "selection", command = show)
 
+
+    def show(self):
+        pass
 
 
 #jobbar här, vill implementera ett sätt att plocka dynamic_file oberoende av class

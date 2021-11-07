@@ -134,11 +134,8 @@ def House(gui, df1, df2):
     'Volume (m3)':Volume,
     'WindowA (m2)':WindowA,
     'RnF (m2)':RnF,
-    'null_heat': 0,
-    'nuclear_e': True,
-    'ground_e': True,
-    'Wind_e': False,
-    'solar_e':True
+    'null_heat': 0
+
 
     }
     #Static_values = {'Uvalue_roof' : 0.08,'Uvalue_floor': 0.14,'Water_in':20,'Area':Area,'Volume':Volume, 'WindowA':WindowA, 'RnF':RnF, 'heat_loss_radiation': heat_loss_radiation}
@@ -349,9 +346,16 @@ def import_databases(gui):
     return conversion, storage
 
 
-def get_graph_options(gui,FILE1, FILE2,DATABASE1,DATABASE2):
+def get_graph_options(FILE1, FILE2,DATABASE1,DATABASE2):
     print("entered get_graph_options")
 
     headers = FILE1.headers + FILE2.headers + DATABASE1.headers + DATABASE2.headers
-    print(headers)
+
     return headers
+
+
+
+
+def analysis(selection, files):
+    print("entered new_funct")
+    print(files)
