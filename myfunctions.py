@@ -280,27 +280,33 @@ def solar_heat(self, files, method):
     return files #Fixed 7.11
 
 def solar_electricity(self,files, method):
-    #print(files[0])
-    #print(files[2]['Solar PV'])
-    #print(type(files[2]))
-    candidates=[]
+    print(files[1]['Solar PV'])
+    if int(files[1]['Solar PV'])==1:
 
-    #print( files[2]['Solar PV']['Efficiency'].max())
-    eff = float(files[2]['Solar PV']['Efficiency'].max())
+        #print(files[0])
+        #print(files[2]['Solar PV'])
+        #print(type(files[2]))
+        candidates=[]
 
-    for index, row in files[2]['Solar PV'].iterrows():
+        #print( files[2]['Solar PV']['Efficiency'].max())
+        eff = float(files[2]['Solar PV']['Efficiency'].max())
 
-        if row['Efficiency'] == eff:
-            candidates.append((index,row['Name']))
+        for index, row in files[2]['Solar PV'].iterrows():
+
+            if row['Efficiency'] == eff:
+                candidates.append((index,row['Name']))
 
 
-    #panel_efficciency = energy_supply('solar_heat','efficiency')
-    selection = Label(self, text = "Your Solar PV selection:" + str(candidates[0])).grid(row=10, column = 0)
+        #panel_efficciency = energy_supply('solar_heat','efficiency')
+        selection = Label(self, text = "Your Solar PV selection:" + str(candidates[0])).grid(row=10, column = 0)
 
-    panel_efficiency = eff
-    #changes to be made
-    files[0]['sol_e_product (kWh)'] = files[0]['Rad (W/m^2)'] * 0.5 * files[1]['RnF (m2)'][0] * panel_efficiency/1000
-    return files #Fixed 7.11
+        panel_efficiency = eff
+        #changes to be made
+        files[0]['sol_e_product (kWh)'] = files[0]['Rad (W/m^2)'] * 0.5 * files[1]['RnF (m2)'][0] * panel_efficiency/1000
+        return files #Fixed 7.11
+
+    else:
+        return
 
 def H_storage(df1,df2):
         print("entered heat_storage")
