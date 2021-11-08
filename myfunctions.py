@@ -253,34 +253,44 @@ def lighting_consumtion(df1,df2):
     return df1
 
 def solar_heat(self, files, method):
-    print(files[0])
-    print(files[2]['Solar Thermal'])
-    print(type(files[2]))
-    candidates=[]
 
-    #print( files[2]['Solar PV']['Efficiency'].max())
-    eff = float(files[2]['Solar Thermal']['Efficiency'].max())
+    if int(files[1]['Solar heat panels'])==1:
 
-    for index, row in files[2]['Solar Thermal'].iterrows():
+        if int(files[1]['Solar PV']) == 1:
+            Roof_area = 0.5
+        else:
+            Roof_area = 1
 
-        if row['Efficiency'] == eff:
-            candidates.append((index,row['Name']))
+        print(files[0])
+        print(files[2]['Solar Thermal'])
+        print(type(files[2]))
+        candidates=[]
 
+        #print( files[2]['Solar PV']['Efficiency'].max())
+        eff = float(files[2]['Solar Thermal']['Efficiency'].max())
 
-    #panel_efficciency = energy_supply('solar_heat','efficiency')
-    selection = Label(self, text = "Your Solar heat panel selection:" + str(candidates[0])).grid(row=11, column = 0)
+        for index, row in files[2]['Solar Thermal'].iterrows():
 
-    panel_efficiency = eff
-
-    #panel_efficciency = energy_supply('solar_heat','efficiency')
-
-    files[0]['sol_h_prod (kWh)'] = files[0]['Rad (W/m^2)'] * 0.5 * files[1]['RnF (m2)'][0] * panel_efficiency/1000
+            if row['Efficiency'] == eff:
+                candidates.append((index,row['Name']))
 
 
-    return files #Fixed 7.11
+        #panel_efficciency = energy_supply('solar_heat','efficiency')
+        selection = Label(self, text = "Your Solar heat panel selection:" + str(candidates[0])).grid(row=11, column = 0)
+
+        panel_efficiency = eff
+
+        #panel_efficciency = energy_supply('solar_heat','efficiency')
+
+        files[0]['sol_h_prod (kWh)'] = files[0]['Rad (W/m^2)'] * Roof_area * files[1]['RnF (m2)'][0] * panel_efficiency/1000
+
+
+        return files #Fixed 7.11
+    else:
+        return files
 
 def solar_electricity(self,files, method):
-    print(files[1]['Solar PV'])
+
     if int(files[1]['Solar PV'])==1:
 
         #print(files[0])
@@ -306,14 +316,20 @@ def solar_electricity(self,files, method):
         return files #Fixed 7.11
 
     else:
-        return
+        return files
 
-def H_storage(df1,df2):
+def H_storage(files):
+    df1= files[0]
+    df2= files[1]
+
+    if int(files[1]['Solar heat panels']) == 1 and int(files[1]['Ground_heat']) == 1 : 
+
         print("entered heat_storage")
-        df1['Heat_storage'] = 0
+
+        files[0]['Heat_storage'] = 0
         storage = {}
 
-        storage['energy_shortage (kWh)'] = df1['Heat_e (kWh)']+df1['sol_h_prod (kWh)']
+        storage['energy_shortage (kWh)'] = files[0]['Heat_e (kWh)']+files[0]['sol_h_prod (kWh)']
 
         #print(Storage['Demand (kWh)'][x])
 
@@ -323,7 +339,7 @@ def H_storage(df1,df2):
         for x in range(len(storage['energy_shortage (kWh)'])):
 
             A = storage['energy_shortage (kWh)'][x]
-            B = df1['Heat_storage'][x]
+            B = files[0]['Heat_storage'][x]
             C = B+A
 
             if  C > 0:
@@ -358,11 +374,16 @@ def H_storage(df1,df2):
                 place_holder.append(0) == 0
             #print("place_holder", place_holder)
         place_holder.pop(0)
-        df1['Heat_storage'] = place_holder
+        files[0]['Heat_storage'] = place_holder
 
-        df1['Heat_storage'].plot()
+        files[0]['Heat_storage'].plot()
 
-        return df1, df2
+    else:
+        print("No heat production available to store!")
+        return files
+
+
+
 
 def import_databases(gui):
     print("entered import_databases")
@@ -386,17 +407,15 @@ def get_graph_options(FILE1, FILE2,DATABASE1,DATABASE2):
 def analysis(files):
     print("entered new_funct")
     #print(files[3])
-
+    print("––––––––––––––––––––––––––––––––––––––")
+    print(files)
     Data = [files[0],files[1]]
     Databases = [files[2],files[3],files[4]]
 
     for items in Databases:
         print(items.keys())
     print(Data[1].columns)
-    print("––––––––––––––––––––––––––––––––––––––")
+
     print("––––––––––––––––––––––––––––––––––––––")
     print("––––––––––––––––––––––––––––––––––––––")
     #print(files)
-
-#    for items in files[4]:
-#        print(items)

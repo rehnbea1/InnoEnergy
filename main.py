@@ -213,7 +213,7 @@ class StartPage(tk.Frame):
         print('method', method.get())
         files = myfunctions.solar_electricity(self,files, method)
         files = myfunctions.solar_heat(self, files, method)
-        files = myfunctions.H_storage(files[0],files[1])
+        files = myfunctions.H_storage(files)
 
 
         A = myfunctions.analysis(files)
@@ -236,6 +236,7 @@ class StartPage(tk.Frame):
         solar_heat  = Checkbutton(self, text = "Solar Heat panels", variable = var3).grid(row = 5, column = 3)
         nuclear     = Checkbutton(self, text = "Nuclear",           variable = var4).grid(row = 5, column = 4)
         Ground_heat = Checkbutton(self, text = "Ground heat",       variable = var5).grid(row = 6, column = 3)
+
         print("-----------------------------------")
 
         Save = Button(self, text = "Save selection", command = lambda: StartPage.show1(self, files, method,var1,var2,var3,var4,var5)).grid(row = 7, column = 3)
