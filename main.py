@@ -11,6 +11,7 @@ matplotlib.use("TkAgg")
 #from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2TkAgg
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 from matplotlib.figure import Figure
+from PIL import ImageTk, Image
 LARGE_FONT = ("Verdana", 8)
 
 
@@ -47,7 +48,14 @@ class Window(tk.Tk):
         container.grid_rowconfigure(0, weight=1)
         container.grid_columnconfigure(0, weight=1)
 
+
         self.geometry("350x350")
+
+        render = ImageTk.PhotoImage(Image.open("House.png"))
+        img = Label(self, image=render)
+        img.image = render
+        img.pack()
+        #img.place(x=100,y=10)
 
 
         self.shared_data = {'file1':StringVar(), 'file2': StringVar(), 'DATABASE1': StringVar(), 'DATABASE2':StringVar(),'DATABASE3':StringVar(), 'options':StringVar()}
