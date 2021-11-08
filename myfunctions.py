@@ -277,7 +277,7 @@ def solar_heat(self, files, method):
     files[0]['sol_h_prod (kWh)'] = files[0]['Rad (W/m^2)'] * 0.5 * files[1]['RnF (m2)'][0] * panel_efficiency/1000
 
 
-    return files
+    return files #Fixed 7.11
 
 def solar_electricity(self,files, method):
     #print(files[0])
@@ -300,7 +300,7 @@ def solar_electricity(self,files, method):
     panel_efficiency = eff
     #changes to be made
     files[0]['sol_e_product (kWh)'] = files[0]['Rad (W/m^2)'] * 0.5 * files[1]['RnF (m2)'][0] * panel_efficiency/1000
-    return files #Fixad 7.11
+    return files #Fixed 7.11
 
 
 def H_storage(df1,df2):
@@ -358,12 +358,6 @@ def H_storage(df1,df2):
         df1['Heat_storage'].plot()
 
         return df1, df2
-
-def test(gui, current_file1, current_file2):
-
-    Lab1 = Label(gui, text = current_file1).grid(row = 6)
-    Lab2 = Label(gui, text = current_file2).grid(row = 7)
-    return
 
 def import_databases(gui):
     print("entered import_databases")
