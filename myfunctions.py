@@ -7,6 +7,7 @@ from tkinter.ttk import *
 from tkinter import filedialog as fd
 from tkinter import messagebox
 import pandas as pd
+import math
 
 
 
@@ -318,11 +319,70 @@ def solar_electricity(self,files, method):
     else:
         return files
 
-def H_storage(files):
-    df1= files[0]
-    df2= files[1]
+def wind_energy(self, files, method):
+    #finds the wind generator with the closest max speed to the cut of speed, in other words the one with a peak capacity that is most optimised to the current wind
 
-    if int(files[1]['Solar heat panels']) == 1 and int(files[1]['Ground_heat']) == 1 : 
+    if int(files[1]['Wind power'])==1:
+
+        print(files[0])
+        print(files[2])
+        #print(files[0])
+        #print(type(files[2]))
+        candidates={}
+
+        #print( files[2]['Solar PV']['Efficiency'].max())
+        wind_max = float(files[0]['Wind speed'].max())
+        wind_min = float(files[0]['Wind speed'].min())
+
+        for index, row in files[2]['Wind Turbine'].iterrows():
+            print("-----------------")
+
+            cut_of_ratio = wind_max/int(row['Cut-off speed (m/s)'])
+
+            if cut_of_ratio < 1.0 and float(row['Initial speed (m/s)']) < float(wind_min):
+                candidates[index] = cut_of_ratio
+                print("cor", cut_of_ratio)
+
+
+
+                best = max(candidates.values())
+
+                print(candidates)
+
+
+
+                for item in candidates.items():
+
+                    if item[1] == best:
+                        selection = files[2]['Wind Turbine'].iloc[item[0]]['Name']
+
+                    else:
+                        pass
+
+                selection = Label(self, text = "Your Wind power selection:" + str(selection)).grid(row=12, column = 0)
+
+                Air_density = 1.2 #kg/m3
+                efficiency = 0.5
+                Area = 3.14*1.5**2 #pi*1,5m
+
+                files[0]['Wind_e_prod (kWh)'] = Air_density * 0.5 * (files[0]['Wind speed'])**3 * efficiency * Area/1000
+
+
+            else:
+                print("no suitable wind power alternatives")
+                return files
+            print(files[0])
+            return(files)
+        #return files #Fixed 7.11
+
+    else:
+        return files
+
+
+
+def H_storage(files):
+
+    if int(files[1]['Solar heat panels']) == 1 and int(files[1]['Ground_heat']) == 1 :
 
         print("entered heat_storage")
 
@@ -376,14 +436,11 @@ def H_storage(files):
         place_holder.pop(0)
         files[0]['Heat_storage'] = place_holder
 
-        files[0]['Heat_storage'].plot()
 
+        return files
     else:
         print("No heat production available to store!")
-        return files
-
-
-
+        return files #Fixed 8.11
 
 def import_databases(gui):
     print("entered import_databases")
@@ -403,18 +460,17 @@ def get_graph_options(FILE1, FILE2,DATABASE1,DATABASE2):
 
 
 
-
 def analysis(files):
     print("entered new_funct")
     #print(files[3])
     print("––––––––––––––––––––––––––––––––––––––")
-    print(files)
+    #print(files)
     Data = [files[0],files[1]]
     Databases = [files[2],files[3],files[4]]
 
     for items in Databases:
         print(items.keys())
-    print(Data[1].columns)
+    #print(Data[1].columns)
 
     print("––––––––––––––––––––––––––––––––––––––")
     print("––––––––––––––––––––––––––––––––––––––")

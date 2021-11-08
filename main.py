@@ -47,7 +47,7 @@ class Window(tk.Tk):
         container.grid_rowconfigure(0, weight=1)
         container.grid_columnconfigure(0, weight=1)
 
-        self.geometry("200x350")
+        self.geometry("350x350")
 
 
         self.shared_data = {'file1':StringVar(), 'file2': StringVar(), 'DATABASE1': StringVar(), 'DATABASE2':StringVar(),'DATABASE3':StringVar(), 'options':StringVar()}
@@ -214,6 +214,7 @@ class StartPage(tk.Frame):
         files = myfunctions.solar_electricity(self,files, method)
         files = myfunctions.solar_heat(self, files, method)
         files = myfunctions.H_storage(files)
+        files = myfunctions.wind_energy(self,files,method)
 
 
         A = myfunctions.analysis(files)
