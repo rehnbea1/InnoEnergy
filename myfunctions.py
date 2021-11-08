@@ -136,23 +136,21 @@ def House(gui, df1, df2):
     'RnF (m2)':RnF,
     'null_heat': 0
 
-
     }
     #Static_values = {'Uvalue_roof' : 0.08,'Uvalue_floor': 0.14,'Water_in':20,'Area':Area,'Volume':Volume, 'WindowA':WindowA, 'RnF':RnF, 'heat_loss_radiation': heat_loss_radiation}
     df2 = Add_par(df2, Static_values)
-
     heat_loss_radiation = df2['Area (m2)'] * df2['Uwalls(W/m2K)'] + df2['WindowA (m2)'] * df2['Uwindows(W/m2K)'] + df2['RnF (m2)']* df2['Uvalue_floor'] + df2['RnF (m2)'] *df2['Uvalue_roof']
-
     df2 = Add_par(df2, {'heat_loss_radiation W':heat_loss_radiation})
 
+    #Dynamic values
 
     df1 = HLC(df1, df2, heat_loss_radiation)
     df1 = calc_heat_w_e(df1, df2)
     df1 = electricity_consumption(df1, df2)
     #df1 = electricity_demand(df1, df2)
     df1 = tot_energy_heating(df1, df2)
-    df1 = solar_heat(df1, df2)
-    df1 = solar_electricity(df1,df2)
+
+
 
 
     #Dessa två ger en massa intressant statistik osv
@@ -195,7 +193,7 @@ def electricity_consumption(df1, df2):
 
     df1['Cooking (MJ)'] = (df1['Cooking (MJ)']/3.6)
     df1 = df1.rename(columns={'Cooking (MJ)': 'Cooking (kWh)'})
-    df1['El.energy (kwh)'] = df1['Cooking (kWh)']+df1['Electrical Applainces (kWh)']
+    df1['El.consumtion (kwh)'] = df1['Cooking (kWh)']+df1['Electrical Applainces (kWh)']
 
     return df1
 
@@ -254,26 +252,56 @@ def lighting_consumtion(df1,df2):
     #read from excel lightbulbs that have the required lumen
     return df1
 
-def solar_heat(df1,df2):
+def solar_heat(self, files, method):
+    print(files[0])
+    print(files[2]['Solar Thermal'])
+    print(type(files[2]))
+    candidates=[]
 
-    #changes to be made still
+    #print( files[2]['Solar PV']['Efficiency'].max())
+    eff = float(files[2]['Solar Thermal']['Efficiency'].max())
+
+    for index, row in files[2]['Solar Thermal'].iterrows():
+
+        if row['Efficiency'] == eff:
+            candidates.append((index,row['Name']))
+
+
     #panel_efficciency = energy_supply('solar_heat','efficiency')
-    panel_efficiency = 0.95
-    #changes to be made
-    df1['sol_h_prod (kWh)'] = df1['Rad (W/m^2)'] * 0.5 * df2['RnF (m2)'][0] * panel_efficiency/1000
+    selection = Label(self, text = "Your Solar heat panel selection:" + str(candidates[0])).grid(row=11, column = 0)
 
+    panel_efficiency = eff
 
-    return df1
-
-def solar_electricity(df1,df2):
-
-    #changes to be made still
     #panel_efficciency = energy_supply('solar_heat','efficiency')
-    panel_efficiency = 0.19
-    #changes to be made
-    df1['sol_e_product (kWh)'] = df1['Rad (W/m^2)'] * 0.5 * df2['RnF (m2)'][0] * panel_efficiency/1000
 
-    return df1
+    files[0]['sol_h_prod (kWh)'] = files[0]['Rad (W/m^2)'] * 0.5 * files[1]['RnF (m2)'][0] * panel_efficiency/1000
+
+
+    return files
+
+def solar_electricity(self,files, method):
+    #print(files[0])
+    #print(files[2]['Solar PV'])
+    #print(type(files[2]))
+    candidates=[]
+
+    #print( files[2]['Solar PV']['Efficiency'].max())
+    eff = float(files[2]['Solar PV']['Efficiency'].max())
+
+    for index, row in files[2]['Solar PV'].iterrows():
+
+        if row['Efficiency'] == eff:
+            candidates.append((index,row['Name']))
+
+
+    #panel_efficciency = energy_supply('solar_heat','efficiency')
+    selection = Label(self, text = "Your Solar PV selection:" + str(candidates[0])).grid(row=10, column = 0)
+
+    panel_efficiency = eff
+    #changes to be made
+    files[0]['sol_e_product (kWh)'] = files[0]['Rad (W/m^2)'] * 0.5 * files[1]['RnF (m2)'][0] * panel_efficiency/1000
+    return files #Fixad 7.11
+
 
 def H_storage(df1,df2):
         print("entered heat_storage")
@@ -339,11 +367,11 @@ def test(gui, current_file1, current_file2):
 
 def import_databases(gui):
     print("entered import_databases")
-    storage = pd.read_excel('/Users/albertrehnberg/Desktop/projekt/StorageTechnologies Database.xlsx', sheet_name =None)
-    print("storage type", type(storage))
-    conversion = pd.read_excel('/Users/albertrehnberg/Desktop/projekt/Conversion Technologies Database.xlsx', sheet_name =None)
+    storage     =   pd.read_excel('/Users/albertrehnberg/Desktop/projekt/StorageTechnologies Database.xlsx', sheet_name =None)
+    conversion  =   pd.read_excel('/Users/albertrehnberg/Desktop/projekt/Conversion Technologies Database.xlsx', sheet_name =None)
+    end_use     =   pd.read_excel('/Users/albertrehnberg/Desktop/projekt/End-Use technologies DataBase.xlsx', sheet_name =None)
 
-    return conversion, storage
+    return conversion, storage, end_use
 
 
 def get_graph_options(FILE1, FILE2,DATABASE1,DATABASE2):
@@ -356,6 +384,20 @@ def get_graph_options(FILE1, FILE2,DATABASE1,DATABASE2):
 
 
 
-def analysis(selection, files):
+def analysis(files):
     print("entered new_funct")
-    print(files)
+    #print(files[3])
+
+    Data = [files[0],files[1]]
+    Databases = [files[2],files[3],files[4]]
+
+    for items in Databases:
+        print(items.keys())
+    print(Data[1].columns)
+    print("––––––––––––––––––––––––––––––––––––––")
+    print("––––––––––––––––––––––––––––––––––––––")
+    print("––––––––––––––––––––––––––––––––––––––")
+    #print(files)
+
+#    for items in files[4]:
+#        print(items)

@@ -10,18 +10,18 @@ import matplotlib
 matplotlib.use("TkAgg")
 #from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2TkAgg
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
-
 from matplotlib.figure import Figure
-
-
-
 LARGE_FONT = ("Verdana", 8)
+
+
+
 
 class File:
 
     def __init__(self, file):
         self.file = file
         if str(type(file)) == "<class 'pandas.core.frame.DataFrame'>":
+
             list =[]
             for key in file.keys():
                 list.append(key)
@@ -47,10 +47,10 @@ class Window(tk.Tk):
         container.grid_rowconfigure(0, weight=1)
         container.grid_columnconfigure(0, weight=1)
 
-        self.geometry("120x150")
+        self.geometry("200x350")
 
 
-        self.shared_data = {'file1':StringVar(), 'file2': StringVar(), 'DATABASE1': StringVar(), 'DATABASE2':StringVar(), 'options':StringVar()}
+        self.shared_data = {'file1':StringVar(), 'file2': StringVar(), 'DATABASE1': StringVar(), 'DATABASE2':StringVar(),'DATABASE3':StringVar(), 'options':StringVar()}
 
         self.frames = {}
 
@@ -79,6 +79,7 @@ class StartPage(tk.Frame):
         self.file2 = controller.shared_data['file2']
         self.DATABASE1 = controller.shared_data['DATABASE1']
         self.DATABASE2 = controller.shared_data['DATABASE2']
+        self.DATABASE3 = controller.shared_data['DATABASE3']
         self.options = controller.shared_data['options']
 
 
@@ -113,11 +114,11 @@ class StartPage(tk.Frame):
         #file2 = Button(gui, text='Browse file_2', command = lambda:myfunctions.Delta2(gui,DATA))
         #file2.grid(row = 2, column = 0, pady =10)
         DATA2 = myfunctions.read_file("/Users/albertrehnberg/Downloads/Static_Data.csv",gui)
-        House_data = myfunctions.House(gui,DATA1,DATA2)
+        df = myfunctions.House(gui,DATA1,DATA2)
 
         #save_data = myfunctions.Get_file_info(House_data[0], House_data[1])
 
-        df = myfunctions.H_storage(House_data[0],House_data[1])
+
         DATABASES = myfunctions.import_databases(gui)
 
         #HALVFÄRDIGT STUFF
@@ -127,26 +128,15 @@ class StartPage(tk.Frame):
 
         #stänger fönstret automatiskt nu
 
-        files  = [df[0],df[1],DATABASES[0],DATABASES[1]]
+        files  = [df[0],df[1],DATABASES[0],DATABASES[1],DATABASES[2]]
 
         FILE1 = File(df[0])
-
         FILE2 = File(df[1])
 
         DATABASE1 = File(DATABASES[0])
-
         DATABASE2 = File(DATABASES[1])
+        DATABASE3 = File(DATABASES[2])
 
-
-
-        #print("–––––FILE1–––––")
-        #print(FILE1.file)
-        #print("–––––FILE2–––––")
-        #print(FILE2.file)
-        #print("–––––DATABASE1–––––")
-        #print(DATABASE1.file)
-        #print("–––––DATABASE2–––––")
-        #print(DATABASE2.file)
 
         print(FILE1.file.columns)
         options = myfunctions.get_graph_options(FILE1,FILE2, DATABASE1,DATABASE2)
@@ -156,16 +146,15 @@ class StartPage(tk.Frame):
         self.file2.set(FILE2.file)
         self.DATABASE1.set(DATABASE1.file)
         self.DATABASE2.set(DATABASE2.file)
+        self.DATABASE3.set(DATABASE3.file)
         self.options.set(options)
 
-
-        #button2 = Button(self,text="press", command = self.show).grid(row=11)
 
 
         clicked = StringVar()
         clicked.set("Select item")
         drop = OptionMenu(self, clicked, *options).grid(row=6, column = 0)
-        mybutton = Button(self,text ='selection', command = lambda: StartPage.show(clicked)).grid(row=6,column =1)
+        mybutton = Button(self,text ='selection', command = lambda: StartPage.show(self,clicked)).grid(row=6,column =1)
 
 
         method = StringVar()
@@ -195,39 +184,44 @@ class StartPage(tk.Frame):
         #my_label.pack()
         #file1.pack()
         #file2.pack()
-    def show(clicked):
+    def show(self,clicked):
         print(clicked.get())
         selection1 = clicked.get()
         return
 
 
-    def show1(self, files, var1,var2,var3,var4,var5):
+    def show1(self, files, method, var1,var2,var3,var4,var5):
 
         textA = Label(self, text = "Wind power: " + str(var1.get())).grid(row=8, column=3)
         textb = Label(self, text = "Solar PV: " + str(var2.get())).grid(row=9, column=3)
         textc = Label(self, text = "Solar Heat panels: " + str(var3.get())).grid(row=10, column=3)
         textd = Label(self, text = "Nuclear: " + str(var4.get())).grid(row=11, column=3)
-        texte = Label(self, text = "Ground heat: " + str(var4.get())).grid(row=11, column=3)
-
+        texte = Label(self, text = "Ground heat: " + str(var5.get())).grid(row=11, column=3)
 
 
         #list = {'Wind power': var1.get(), 'Solar PV':var2.get(),'Solar Heat panels':var3.get(),'Nuclear':var4.get()}
-        print(type(list))
         print(files[1])
         files[1]['Wind power']= var1.get()
         files[1]['Solar PV']= var2.get()
-        files[1]['Solar heat panels']= var3.get()
+        files[1]['Solar heat panels'] = var3.get()
         files[1]['Nuclear']= var4.get()
-        files[1]['Ground_heat']= var5.get()
+        files[1]['Ground_heat'] = var5.get()
 
         #{'Wind power': var1.get()}, {'Solar PV':var2.get()},{'Solar Heat panels':var3.get()},{'Nuclear':var4.get()})
         print(files[1])
+
+        print('method', method.get())
+        files = myfunctions.solar_electricity(self,files, method)
+        files = myfunctions.solar_heat(self, files, method)
+        files = myfunctions.H_storage(files[0],files[1])
+
+
+        A = myfunctions.analysis(files)
+
+
     def display(self,method,files):
 
-        print(method.get())
-        selection = method.get()
-
-        self.selection = selection
+        self.selection = method.get()
 
         var1 = IntVar()
         var2 = IntVar()
@@ -242,17 +236,9 @@ class StartPage(tk.Frame):
         solar_heat  = Checkbutton(self, text = "Solar Heat panels", variable = var3).grid(row = 5, column = 3)
         nuclear     = Checkbutton(self, text = "Nuclear",           variable = var4).grid(row = 5, column = 4)
         Ground_heat = Checkbutton(self, text = "Ground heat",       variable = var5).grid(row = 6, column = 3)
-
-
-
         print("-----------------------------------")
 
-
-
-
-        Save = Button(self, text = "Save selection", command = lambda: StartPage.show1(self, files,var1,var2,var3,var4, var5)).grid(row = 7, column = 3, pady=10)
-
-        #A = myfunctions.analysis(selection, files)
+        Save = Button(self, text = "Save selection", command = lambda: StartPage.show1(self, files, method,var1,var2,var3,var4,var5)).grid(row = 7, column = 3)
 
 
 
@@ -282,7 +268,7 @@ class GraphPage(tk.Frame):
         #tk.Label(self, text = "selected file : ").grid(row=10) # text assigns a permanent value
 
 
-        button1 = Button(self, text="Back to Home",command = lambda: controller.show_frame(StartPage)).grid(row = 3)
+        Back_to_home_btn = Button(self, text="Back to Home",command = lambda: controller.show_frame(StartPage)).grid(row = 3)
 
 
 
