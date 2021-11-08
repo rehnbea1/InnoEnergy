@@ -378,8 +378,6 @@ def wind_energy(self, files, method):
     else:
         return files
 
-
-
 def H_storage(files):
 
     if int(files[1]['Solar heat panels']) == 1 and int(files[1]['Ground_heat']) == 1 :
@@ -390,8 +388,6 @@ def H_storage(files):
         storage = {}
 
         storage['energy_shortage (kWh)'] = files[0]['Heat_e (kWh)']+files[0]['sol_h_prod (kWh)']
-
-        #print(Storage['Demand (kWh)'][x])
 
         place_holder = []
         place_holder.append(0)
@@ -449,7 +445,6 @@ def import_databases(gui):
     end_use     =   pd.read_excel('/Users/albertrehnberg/Desktop/projekt/End-Use technologies DataBase.xlsx', sheet_name =None)
 
     return conversion, storage, end_use
-
 
 def get_graph_options(FILE1, FILE2,DATABASE1,DATABASE2):
     print("entered get_graph_options")

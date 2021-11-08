@@ -50,6 +50,7 @@ class Window(tk.Tk):
 
 
         self.geometry("350x350")
+        self.title("Energy Management System ")
 
         render = ImageTk.PhotoImage(Image.open("House.png"))
         img = Label(self, image=render)
@@ -80,7 +81,7 @@ class StartPage(tk.Frame):
     def __init__(self,parent,controller):
         tk.Frame.__init__(self,parent)
         label = tk.Label(self,text="StartPage", font= LARGE_FONT)
-        label.grid(row=0,pady=10)
+        label.grid(row=1,pady=10)
 
 
         self.file1 = controller.shared_data['file1']
@@ -96,10 +97,10 @@ class StartPage(tk.Frame):
 
 
         file1 = Button(self, text='Browse file_1',
-                        command = lambda: self.Delta1()).grid(row = 1)
+                        command = lambda: self.Delta1()).grid(row = 2)
 
         Page_two = Button(self, text="PageOne",
-                        command = lambda: controller.show_frame(PageOne)).grid(row = 2)
+                        command = lambda: controller.show_frame(PageOne)).grid(row = 3)
 
         Graph_page = Button(self, text="GraphPage",
                         command = lambda: controller.show_frame(GraphPage)).grid(row = 4)
@@ -123,6 +124,15 @@ class StartPage(tk.Frame):
         #file2.grid(row = 2, column = 0, pady =10)
         DATA2 = myfunctions.read_file("/Users/albertrehnberg/Downloads/Static_Data.csv",gui)
         df = myfunctions.House(gui,DATA1,DATA2)
+        df[0]['spot-price €/kWh'] = [0.00213,0.00220,	0.00217,0.0217,	0.00222,	0.00235,	0.00421,	0.001254,	0.001451,	0.001641,	0.001650,	0.001580,	0.001490,	0.001389,	0.001439,
+        	0.001486,	0.001611,	0.002784,	0.003543,	0.003377,	0.001559,	0.001332,	0.001288,	0.001219]
+
+
+
+
+
+
+
 
         #save_data = myfunctions.Get_file_info(House_data[0], House_data[1])
 
@@ -166,7 +176,8 @@ class StartPage(tk.Frame):
 
 
         method = StringVar()
-        list = ["energy","Other","Cost2"]
+        list = ["---" , "Efficiency","Price"]
+
         drop = OptionMenu(self, method, *list).grid(row=7,column=0)
         confirm = Button(self, text= "confirm", command = lambda : self.display(method,files)).grid(row=7,column=1)
 
@@ -200,15 +211,17 @@ class StartPage(tk.Frame):
 
     def show1(self, files, method, var1,var2,var3,var4,var5):
 
-        textA = Label(self, text = "Wind power: " + str(var1.get())).grid(row=8, column=3)
-        textb = Label(self, text = "Solar PV: " + str(var2.get())).grid(row=9, column=3)
+        textA = Label(self, text = "Wind power: " + str(var1.get())).grid(row=9, column=3)
+        textb = Label(self, text = "Solar PV: " + str(var2.get())).grid(row=9, column=4)
         textc = Label(self, text = "Solar Heat panels: " + str(var3.get())).grid(row=10, column=3)
-        textd = Label(self, text = "Nuclear: " + str(var4.get())).grid(row=11, column=3)
+        textd = Label(self, text = "Nuclear: " + str(var4.get())).grid(row=10, column=4)
         texte = Label(self, text = "Ground heat: " + str(var5.get())).grid(row=11, column=3)
+
 
 
         #list = {'Wind power': var1.get(), 'Solar PV':var2.get(),'Solar Heat panels':var3.get(),'Nuclear':var4.get()}
         print(files[1])
+        files[1]["None"]= var4.get()
         files[1]['Wind power']= var1.get()
         files[1]['Solar PV']= var2.get()
         files[1]['Solar heat panels'] = var3.get()
@@ -249,8 +262,6 @@ class StartPage(tk.Frame):
         print("-----------------------------------")
 
         Save = Button(self, text = "Save selection", command = lambda: StartPage.show1(self, files, method,var1,var2,var3,var4,var5)).grid(row = 7, column = 3)
-
-
 
 
 
