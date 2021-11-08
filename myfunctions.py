@@ -206,7 +206,7 @@ def energy_supply(crit1, crit2):
 
 def tot_energy_heating(df1, df2):
     print("Entered tot_energy_heating function")
-    OHPH = 100 #Wh, Occupation_heat_per_hour
+    OHPH = df2['Qpeople(W)'] #Wh, Occupation_heat_per_hour
 
 
     air_losses = calculate_air_heat_losses(df1,df2)
@@ -215,7 +215,7 @@ def tot_energy_heating(df1, df2):
 
     df1.loc[df1['Occupation'] == 0, 'Heat_e (kWh)'] = df2['null_heat'][0]
 
-    return df1
+    return df1 #Fixed 8.11
 
 def calculate_air_heat_losses(df1,df2):
     Volume_per_hour = df2['Air Changes/hour (h^-1)'][0] * df2['Volume (m3)'][0]
@@ -301,7 +301,6 @@ def solar_electricity(self,files, method):
     #changes to be made
     files[0]['sol_e_product (kWh)'] = files[0]['Rad (W/m^2)'] * 0.5 * files[1]['RnF (m2)'][0] * panel_efficiency/1000
     return files #Fixed 7.11
-
 
 def H_storage(df1,df2):
         print("entered heat_storage")
