@@ -84,7 +84,6 @@ def Check_file(file,gui):
 def show_data(gui,data):
     i=5
     a = len(data.keys())
-    print("show_data")
     for x in range(a):
 
         Label(gui, text=data[x]).grid(row=i, column=0)
@@ -159,7 +158,6 @@ def House(gui, df1, df2):
     #print(df2.describe())
 
     return df1, df2
-
 
 def HLC(df1,df2, heat_loss_radiation):
     print("Entered function: HLC")
@@ -254,70 +252,160 @@ def lighting_consumtion(df1,df2):
     return df1
 
 def solar_heat(self, files, method):
+    print("method----", method)
 
     if int(files[1]['Solar heat panels'])==1:
 
-        if int(files[1]['Solar PV']) == 1:
-            Roof_area = 0.5
-        else:
-            Roof_area = 1
+        if method == "Efficiency":
+            if int(files[1]['Solar PV']) == 1:
+                Roof_area = 0.5
+            else:
+                Roof_area = 1
 
-        print(files[0])
-        print(files[2]['Solar Thermal'])
-        print(type(files[2]))
-        candidates=[]
+            print(files[0])
+            print(files[2]['Solar Thermal'])
+            print(type(files[2]))
+            candidates=[]
 
-        #print( files[2]['Solar PV']['Efficiency'].max())
-        eff = float(files[2]['Solar Thermal']['Efficiency'].max())
+            #print( files[2]['Solar PV']['Efficiency'].max())
+            eff = float(files[2]['Solar Thermal']['Efficiency'].max())
 
-        for index, row in files[2]['Solar Thermal'].iterrows():
+            for index, row in files[2]['Solar Thermal'].iterrows():
 
-            if row['Efficiency'] == eff:
-                candidates.append((index,row['Name']))
-
-
-        #panel_efficciency = energy_supply('solar_heat','efficiency')
-        selection = Label(self, text = "Your Solar heat panel selection:" + str(candidates[0])).grid(row=11, column = 0)
-
-        panel_efficiency = eff
-
-        #panel_efficciency = energy_supply('solar_heat','efficiency')
-
-        files[0]['sol_h_prod (kWh)'] = files[0]['Rad (W/m^2)'] * Roof_area * files[1]['RnF (m2)'][0] * panel_efficiency/1000
+                if row['Efficiency'] == eff:
+                    candidates.append((index,row['Name']))
 
 
-        return files #Fixed 7.11
+            #panel_efficciency = energy_supply('solar_heat','efficiency')
+            selection = Label(self, text = "Your Solar heat panel selection:" + str(candidates[0])).grid(row=11, column = 0)
+
+            panel_efficiency = eff
+
+            #panel_efficciency = energy_supply('solar_heat','efficiency')
+
+            files[0]['sol_h_prod (kWh)'] = files[0]['Rad (W/m^2)'] * Roof_area * files[1]['RnF (m2)'][0] * panel_efficiency/1000
+            return files #Fixed 7.11
+
+
+
+        elif method == "Price":
+
+            if int(files[1]['Solar PV']) == 1:
+                Roof_L = Label(self, text="How many PV:s do you want").grid(row=0, column=3)
+                self.Roof = tk.Entry(self).grid(row=1,column=3)
+                #self.Roof.set()
+
+                submit = Button(self, text="Submit", command= lambda: show_entry_fields(self)).grid(row=1, column=4)
+
+                Roof_area = 0.5
+
+            else:
+                Roof_area = 1
+
+            print(files[0])
+            print(files[2]['Solar Thermal'])
+            print(type(files[2]))
+            candidates=[]
+
+            #print( files[2]['Solar PV']['Efficiency'].max())
+            eff = float(files[2]['Solar Thermal']['Efficiency'].max())
+
+            for index, row in files[2]['Solar Thermal'].iterrows():
+
+                if row['Efficiency'] == eff:
+                    candidates.append((index,row['Name']))
+
+
+            #panel_efficciency = energy_supply('solar_heat','efficiency')
+            selection = Label(self, text = "Your Solar heat panel selection:" + str(candidates[0])).grid(row=11, column = 0)
+
+            panel_efficiency = eff
+
+            #panel_efficciency = energy_supply('solar_heat','efficiency')
+
+            files[0]['sol_h_prod (kWh)'] = files[0]['Rad (W/m^2)'] * Roof_area * files[1]['RnF (m2)'][0] * panel_efficiency/1000
+
+            return files
+
+
+
     else:
         return files
+
+def show_entry_fields(self):
+    print("First Name:",self.Roof.get())
+    number = self.Roof.get()
+    return number
+
 
 def solar_electricity(self,files, method):
 
     if int(files[1]['Solar PV'])==1:
 
-        #print(files[0])
-        #print(files[2]['Solar PV'])
-        #print(type(files[2]))
-        candidates=[]
-
-        #print( files[2]['Solar PV']['Efficiency'].max())
-        eff = float(files[2]['Solar PV']['Efficiency'].max())
-
-        for index, row in files[2]['Solar PV'].iterrows():
-
-            if row['Efficiency'] == eff:
-                candidates.append((index,row['Name']))
+        if method == "Efficiency":
 
 
-        #panel_efficciency = energy_supply('solar_heat','efficiency')
-        selection = Label(self, text = "Your Solar PV selection:" + str(candidates[0])).grid(row=10, column = 0)
+            #print(files[0])
+            #print(files[2]['Solar PV'])
+            #print(type(files[2]))
+            candidates=[]
+            eff = float(files[2]['Solar PV']['Efficiency'].max())
 
-        panel_efficiency = eff
-        #changes to be made
-        files[0]['sol_e_product (kWh)'] = files[0]['Rad (W/m^2)'] * 0.5 * files[1]['RnF (m2)'][0] * panel_efficiency/1000
-        return files #Fixed 7.11
+            for index, row in files[2]['Solar PV'].iterrows():
+
+                if row['Efficiency'] == eff:
+                    candidates.append((index,row['Name']))
+
+            selection = Label(self, text = "Your Solar PV selection:" + str(candidates[0])).grid(row=10, column = 0)
+
+            panel_efficiency = eff
+            files[0]['sol_e_product (kWh)'] = files[0]['Rad (W/m^2)'] * 0.5 * files[1]['RnF (m2)'][0] * panel_efficiency/1000
+            return files #Fixed 7.11
+
+        elif method =="Price":
+
+            candidates=[]
+            eff = []
+            price = float(files[2]['Solar PV']['Price (€)'].min())
+
+            for index, row in files[2]['Solar PV'].iterrows():
+
+                if row['Price (€)'] == price:
+                    candidates.append((index,row['Name']))
+                    eff.append(row['Efficiency'])
+
+            selection = Label(self, text = "Your Solar PV selection:" + str(candidates[0])).grid(row=10, column = 0)
+
+            panel_efficiency = eff
+            files[0]['sol_e_product (kWh)'] = files[0]['Rad (W/m^2)'] * 0.5 * files[1]['RnF (m2)'][0] * float(eff[0])/1000
+            return files
+
+
+        elif method == "Default":
+
+            candidates=[]
+            eff = float(files[2]['Solar PV']['Efficiency'].max())
+
+            for index, row in files[2]['Solar PV'].iterrows():
+
+                if row['Efficiency'] == eff:
+                    candidates.append((index,row['Name']))
+
+            selection = Label(self, text = "Your Solar PV selection:" + str(candidates[0])).grid(row=10, column = 0)
+
+            panel_efficiency = eff
+            files[0]['sol_e_product (kWh)'] = files[0]['Rad (W/m^2)'] * 0.5 * files[1]['RnF (m2)'][0] * panel_efficiency/1000
+            return files #Fixed 7.11
+
+
+
+        else:
+            return files
 
     else:
         return files
+
+
 
 def wind_energy(self, files, method):
     #finds the wind generator with the closest max speed to the cut of speed, in other words the one with a peak capacity that is most optimised to the current wind
@@ -452,7 +540,6 @@ def get_graph_options(FILE1, FILE2,DATABASE1,DATABASE2):
     headers = FILE1.headers + FILE2.headers + DATABASE1.headers + DATABASE2.headers
 
     return headers
-
 
 
 def analysis(files):

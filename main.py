@@ -15,8 +15,6 @@ from PIL import ImageTk, Image
 LARGE_FONT = ("Verdana", 8)
 
 
-
-
 class File:
 
     def __init__(self, file):
@@ -34,7 +32,6 @@ class File:
                     a = str(dict+" : "+key)
                     list.append(a)
             self.headers = list
-
 
 
 class Window(tk.Tk):
@@ -59,7 +56,7 @@ class Window(tk.Tk):
         #img.place(x=100,y=10)
 
 
-        self.shared_data = {'file1':StringVar(), 'file2': StringVar(), 'DATABASE1': StringVar(), 'DATABASE2':StringVar(),'DATABASE3':StringVar(), 'options':StringVar()}
+        self.shared_data = {'file1':StringVar(), 'file2': StringVar(), 'DATABASE1': StringVar(), 'DATABASE2':StringVar(),'DATABASE3':StringVar(), 'options':StringVar(), 'Roof':StringVar()}
 
         self.frames = {}
 
@@ -90,11 +87,9 @@ class StartPage(tk.Frame):
         self.DATABASE2 = controller.shared_data['DATABASE2']
         self.DATABASE3 = controller.shared_data['DATABASE3']
         self.options = controller.shared_data['options']
-
+        self.Roof = controller.shared_data['Roof']
 
         #controller.shared_data.update({'options':options})
-
-
 
         file1 = Button(self, text='Browse file_1',
                         command = lambda: self.Delta1()).grid(row = 2)
@@ -105,7 +100,7 @@ class StartPage(tk.Frame):
         Graph_page = Button(self, text="GraphPage",
                         command = lambda: controller.show_frame(GraphPage)).grid(row = 4)
 
-        destroy = Button(self,text="testknapp",
+        destroy = Button(self,text="Exit program",
                         command = lambda: gui.destroy()).grid(row=5)
 
 
@@ -124,11 +119,7 @@ class StartPage(tk.Frame):
         #file2.grid(row = 2, column = 0, pady =10)
         DATA2 = myfunctions.read_file("/Users/albertrehnberg/Downloads/Static_Data.csv",gui)
         df = myfunctions.House(gui,DATA1,DATA2)
-        df[0]['spot-price €/kWh'] = [0.00213,0.00220,	0.00217,0.0217,	0.00222,	0.00235,	0.00421,	0.001254,	0.001451,	0.001641,	0.001650,	0.001580,	0.001490,	0.001389,	0.001439,
-        	0.001486,	0.001611,	0.002784,	0.003543,	0.003377,	0.001559,	0.001332,	0.001288,	0.001219]
-
-
-
+        df[0]['spot-price €/kWh'] = [0.00213,0.00220,0.00217,0.0217,0.00222,0.00235,0.00421,0.001254,0.001451,0.001641,0.001650,0.001580,0.001490,0.001389,0.001439,0.001486,0.001611,0.002784,0.003543,0.003377,0.001559,0.001332,0.001288,0.001219]
 
 
 
@@ -176,7 +167,7 @@ class StartPage(tk.Frame):
 
 
         method = StringVar()
-        list = ["---" , "Efficiency","Price"]
+        list = ["Default" , "Efficiency","Price"]
 
         drop = OptionMenu(self, method, *list).grid(row=7,column=0)
         confirm = Button(self, text= "confirm", command = lambda : self.display(method,files)).grid(row=7,column=1)
@@ -230,17 +221,27 @@ class StartPage(tk.Frame):
 
         #{'Wind power': var1.get()}, {'Solar PV':var2.get()},{'Solar Heat panels':var3.get()},{'Nuclear':var4.get()})
         print(files[1])
-
-        print('method', method.get())
+        method = method.get()
+        print("---––––––––––––––––––––––––")
         files = myfunctions.solar_electricity(self,files, method)
         files = myfunctions.solar_heat(self, files, method)
         files = myfunctions.H_storage(files)
-        files = myfunctions.wind_energy(self,files,method)
 
 
-        A = myfunctions.analysis(files)
+        #A = myfunctions.analysis(files)
 
 
+
+
+
+
+
+
+
+
+
+
+        
     def display(self,method,files):
 
         self.selection = method.get()
@@ -258,6 +259,7 @@ class StartPage(tk.Frame):
         solar_heat  = Checkbutton(self, text = "Solar Heat panels", variable = var3).grid(row = 5, column = 3)
         nuclear     = Checkbutton(self, text = "Nuclear",           variable = var4).grid(row = 5, column = 4)
         Ground_heat = Checkbutton(self, text = "Ground heat",       variable = var5).grid(row = 6, column = 3)
+
 
         print("-----------------------------------")
 
@@ -290,14 +292,6 @@ class GraphPage(tk.Frame):
 
 
         Back_to_home_btn = Button(self, text="Back to Home",command = lambda: controller.show_frame(StartPage)).grid(row = 3)
-
-
-
-    def show(self):
-        pass
-
-
-#jobbar här, vill implementera ett sätt att plocka dynamic_file oberoende av class
 
 
     def plot_graph(self):
