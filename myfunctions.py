@@ -258,9 +258,9 @@ def solar_heat(self, files, method):
 
         if method == "Efficiency":
             if int(files[1]['Solar PV']) == 1:
-                Roof_area = 0.5
+                Roof_area = 0.4
             else:
-                Roof_area = 1
+                Roof_area = 0.8
 
             print(files[0])
             print(files[2]['Solar Thermal'])
@@ -286,21 +286,13 @@ def solar_heat(self, files, method):
             files[0]['sol_h_prod (kWh)'] = files[0]['Rad (W/m^2)'] * Roof_area * files[1]['RnF (m2)'][0] * panel_efficiency/1000
             return files #Fixed 7.11
 
-
-
         elif method == "Price":
 
             if int(files[1]['Solar PV']) == 1:
-                Roof_L = Label(self, text="How many PV:s do you want").grid(row=0, column=3)
-                self.Roof = tk.Entry(self).grid(row=1,column=3)
-                #self.Roof.set()
 
-                submit = Button(self, text="Submit", command= lambda: show_entry_fields(self)).grid(row=1, column=4)
-
-                Roof_area = 0.5
-
+                Roof_area = 0.4
             else:
-                Roof_area = 1
+                Roof_area = 0.8
 
             print(files[0])
             print(files[2]['Solar Thermal'])
@@ -327,15 +319,41 @@ def solar_heat(self, files, method):
 
             return files
 
+        elif method =="Default":
 
+            if int(files[1]['Solar PV']) == 1:
+
+                Roof_area = 0.4
+            else:
+                Roof_area = 0.8
+
+            print(files[0])
+            print(files[2]['Solar Thermal'])
+            print(type(files[2]))
+            candidates=[]
+
+            #print( files[2]['Solar PV']['Efficiency'].max())
+            eff = float(files[2]['Solar Thermal']['Efficiency'].max())
+
+            for index, row in files[2]['Solar Thermal'].iterrows():
+
+                if row['Efficiency'] == eff:
+                    candidates.append((index,row['Name']))
+
+
+            #panel_efficciency = energy_supply('solar_heat','efficiency')
+            selection = Label(self, text = "Your Solar heat panel selection:" + str(candidates[0])).grid(row=11, column = 0)
+
+            panel_efficiency = eff
+
+            #panel_efficciency = energy_supply('solar_heat','efficiency')
+
+            files[0]['sol_h_prod (kWh)'] = files[0]['Rad (W/m^2)'] * Roof_area * files[1]['RnF (m2)'][0] * panel_efficiency/1000
+
+            return files
 
     else:
         return files
-
-def show_entry_fields(self):
-    print("First Name:",self.Roof.get())
-    number = self.Roof.get()
-    return number
 
 
 def solar_electricity(self,files, method):

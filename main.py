@@ -76,6 +76,7 @@ class Window(tk.Tk):
 class StartPage(tk.Frame):
 
     def __init__(self,parent,controller):
+
         tk.Frame.__init__(self,parent)
         label = tk.Label(self,text="StartPage", font= LARGE_FONT)
         label.grid(row=1,pady=10)
@@ -160,6 +161,7 @@ class StartPage(tk.Frame):
 
 
 
+
         clicked = StringVar()
         clicked.set("Select item")
         drop = OptionMenu(self, clicked, *options).grid(row=6, column = 0)
@@ -226,22 +228,12 @@ class StartPage(tk.Frame):
         files = myfunctions.solar_electricity(self,files, method)
         files = myfunctions.solar_heat(self, files, method)
         files = myfunctions.H_storage(files)
-
-
-        #A = myfunctions.analysis(files)
-
-
-
-
-
-
-
-
-
-
-
-
         
+
+        A = myfunctions.analysis(files)
+
+
+
     def display(self,method,files):
 
         self.selection = method.get()
