@@ -110,17 +110,10 @@ def show_data(gui,data):
 def House(gui, df1, df2):
     print("Entered: House function")
 
-#Length(m)	Depth(m)	Height(m)	Uwalls(W/m2K)	Uwindows(W/m2K)	Awindow/Awall	Air Changes/hour (h^-1)	Tinside(ºC)	Twaterin(ºC)	Qpeople(W)	Window Solar Gain	Height Lights (m)
-#10	5	3	1	2	0.2	0.5	2	20	120	0.25	1.May
-
-    #print("df1")
-    #print(df1)
-    #print("df2")
-    #print(df2)
     print("df1 & df2 read correctly")
 
     #funktion för att insert flera static values här?
-    Static_values = {'Uvalue_roof' : 0.08,'Uvalue_floor': 0.14,'Water_in':20}
+    Static_values = {'Uvalue_roof' : 0.08,'Uvalue_floor': 0.14}
 
     Area    =   df2['Length(m)']*df2['Depth(m)']*2 + df2['Length(m)']*df2['Height(m)']*4
     Volume  =   df2['Length(m)']*df2['Depth(m)']*df2['Height(m)']
@@ -137,7 +130,7 @@ def House(gui, df1, df2):
     'null_heat': 0
 
     }
-    #Static_values = {'Uvalue_roof' : 0.08,'Uvalue_floor': 0.14,'Water_in':20,'Area':Area,'Volume':Volume, 'WindowA':WindowA, 'RnF':RnF, 'heat_loss_radiation': heat_loss_radiation}
+
     df2 = Add_par(df2, Static_values)
     heat_loss_radiation = df2['Area (m2)'] * df2['Uwalls(W/m2K)'] + df2['WindowA (m2)'] * df2['Uwindows(W/m2K)'] + df2['RnF (m2)']* df2['Uvalue_floor'] + df2['RnF (m2)'] *df2['Uvalue_roof']
     df2 = Add_par(df2, {'heat_loss_radiation W':heat_loss_radiation})
@@ -147,7 +140,6 @@ def House(gui, df1, df2):
     df1 = HLC(df1, df2, heat_loss_radiation)
     df1 = calc_heat_w_e(df1, df2)
     df1 = electricity_consumption(df1, df2)
-    #df1 = electricity_demand(df1, df2)
     df1 = tot_energy_heating(df1, df2)
 
 
@@ -231,25 +223,43 @@ def calculate_air_heat_losses(df1,df2):
         list.append(Air_heating)
     return list
 
-def lighting_consumtion(df1,df2):
-
+def lighting_consumtion(self, files):
 
     #energy_supply(lighting,... )
-    efficiency = 0.7
-    selected_watt = 0
-    sel_lumen = 60
 
-
-    lumens = df1['Lighting (lux)']*(df2['Height Lights (m)'][0])**2
-    A = lumens/df1['Total lapms'] #gives lumen demand per light bulb
+    lumens = files[0]['Lighting (lux)']*(files[1]['Height Lights (m)'][0])**2
+    A = lumens/files[0]['Total lapms'] #gives lumen demand per light bulb
     lum_max = A.max()
+    list =[]
+    for index, row in files[4]['Lighting'].iterrows():
+        if row['Lumens (lm)'] >= A.max():
+            list.append((index, row['Name'],row['Power (W)'],  row['Hours']))
+    print(list)
+
+    lab = Label(self, text ="Found following suitable items: ")
+    i = 10
+    for item in list:
+        label = Label(self, text = item).grid(row= i, column = 1)
+        i+=1
+    promt = Label(self, text= " select your lighting application").grid(sticky = 'S')
+    self.update_entry = Entry(self).grid(sticky = 'S')
+    update = Button(self, text ="Submit", command = lambda: submit(self)).grid(sticky = "S")
+
+
+
     #search for lightbulb with minimum Amax lumens
     #E_consumption =
 
     #b = A.max() is the highest required llumen for a lightbulb durring the day <-search for this one
 
     #read from excel lightbulbs that have the required lumen
-    return df1
+    return files
+def submit(self):
+
+    print("Entry:", self.update_entry)
+
+    return
+
 
 def solar_heat(self, files, method):
     print("method----", method)
@@ -362,7 +372,10 @@ def solar_electricity(self,files, method):
 
         if method == "Efficiency":
 
-
+            if int(files[1]['Solar PV']) == 1:
+                Area_var = 0,4
+            else:
+                Area_var = 0,8
             #print(files[0])
             #print(files[2]['Solar PV'])
             #print(type(files[2]))
@@ -377,11 +390,15 @@ def solar_electricity(self,files, method):
             selection = Label(self, text = "Your Solar PV selection:" + str(candidates[0])).grid(row=10, column = 0)
 
             panel_efficiency = eff
-            files[0]['sol_e_product (kWh)'] = files[0]['Rad (W/m^2)'] * 0.5 * files[1]['RnF (m2)'][0] * panel_efficiency/1000
+            files[0]['sol_e_product (kWh)'] = files[0]['Rad (W/m^2)'] * 0.5 * files[1]['RnF (m2)'][0]* Area_var * panel_efficiency/1000
             return files #Fixed 7.11
 
         elif method =="Price":
 
+            if int(files[1]['Solar PV']) == 1:
+                Area_var = 0,4
+            else:
+                Area_var = 0,8
             candidates=[]
             eff = []
             price = float(files[2]['Solar PV']['Price (€)'].min())
@@ -395,11 +412,16 @@ def solar_electricity(self,files, method):
             selection = Label(self, text = "Your Solar PV selection:" + str(candidates[0])).grid(row=10, column = 0)
 
             panel_efficiency = eff
-            files[0]['sol_e_product (kWh)'] = files[0]['Rad (W/m^2)'] * 0.5 * files[1]['RnF (m2)'][0] * float(eff[0])/1000
+            files[0]['sol_e_product (kWh)'] = files[0]['Rad (W/m^2)'] * 0.5 * files[1]['RnF (m2)'][0] * Area_var * float(eff[0])/1000
             return files
 
-
         elif method == "Default":
+
+            if int(files[1]['Solar PV']) == 1:
+                Area_var = 0,4
+            else:
+                Area_var = 0,8
+
 
             candidates=[]
             eff = float(files[2]['Solar PV']['Efficiency'].max())
@@ -412,11 +434,8 @@ def solar_electricity(self,files, method):
             selection = Label(self, text = "Your Solar PV selection:" + str(candidates[0])).grid(row=10, column = 0)
 
             panel_efficiency = eff
-            files[0]['sol_e_product (kWh)'] = files[0]['Rad (W/m^2)'] * 0.5 * files[1]['RnF (m2)'][0] * panel_efficiency/1000
+            files[0]['sol_e_product (kWh)'] = files[0]['Rad (W/m^2)'] * 0.5 * files[1]['RnF (m2)'][0] * Area_var * panel_efficiency/1000
             return files #Fixed 7.11
-
-
-
         else:
             return files
 

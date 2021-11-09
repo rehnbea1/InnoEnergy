@@ -228,10 +228,10 @@ class StartPage(tk.Frame):
         files = myfunctions.solar_electricity(self,files, method)
         files = myfunctions.solar_heat(self, files, method)
         files = myfunctions.H_storage(files)
-        
+        files = myfunctions.lighting_consumtion(self,files)
+
 
         A = myfunctions.analysis(files)
-
 
 
     def display(self,method,files):
@@ -258,7 +258,6 @@ class StartPage(tk.Frame):
         Save = Button(self, text = "Save selection", command = lambda: StartPage.show1(self, files, method,var1,var2,var3,var4,var5)).grid(row = 7, column = 3)
 
 
-
 class PageOne(tk.Frame):
 
     def __init__(self,parent,controller):
@@ -268,7 +267,6 @@ class PageOne(tk.Frame):
 
         Button1 = Button(self, text="Back to Home",
                         command = lambda: controller.show_frame(StartPage)).grid(row = 3)
-
 
 
 class GraphPage(tk.Frame):
@@ -299,10 +297,11 @@ class GraphPage(tk.Frame):
        canvas.get_tk_widget().grid(row = 5)
 
 
+
+
+
 gui = Window()
 gui.mainloop()
-
-
 
 if __name__== '__main__':
     main()
