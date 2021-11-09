@@ -236,27 +236,31 @@ def lighting_consumtion(self, files):
             list.append((index, row['Name'],row['Power (W)'],  row['Hours']))
     print(list)
 
-    lab = Label(self, text ="Found following suitable items: ")
-    i = 10
+    label1 = Label(self, text ="Found following suitable items: ").grid(column = 0, sticky="W")
+    label2 = Label(self, text = " ITEM  ,   NAME    ,   Power (W)   ,   Lifetime").grid(column = 0, sticky="W")
+    i = 11
     for item in list:
-        label = Label(self, text = item).grid(row= i, column = 1)
+        label3 = Label(self, text = item).grid(row= i, column = 0, sticky="W")
         i+=1
-    promt = Label(self, text= " select your lighting application").grid(sticky = 'S')
-    self.update_entry = Entry(self).grid(sticky = 'S')
-    update = Button(self, text ="Submit", command = lambda: submit(self)).grid(sticky = "S")
+
+    promt = Label(self, text= " select your lighting application").grid(sticky="W")
+    entry = StringVar()
+    box = Entry(self, textvariable = entry).grid(sticky="W")
+    confirm = Button(self, text= "Submit", command = lambda : submit(self,entry,files, list)).grid(sticky="W")
 
 
-
-    #search for lightbulb with minimum Amax lumens
-    #E_consumption =
-
-    #b = A.max() is the highest required llumen for a lightbulb durring the day <-search for this one
-
-    #read from excel lightbulbs that have the required lumen
     return files
-def submit(self):
 
-    print("Entry:", self.update_entry)
+def submit(self,entry,files, list):
+    a = int(entry.get())
+
+    for item in list:
+        if item[0] == a:
+            label4 = Label(self, text =list[item]).grid(column=0, sticky="W")
+
+
+    print("Entry:", entry.get())
+    print(type(a))
 
     return
 
@@ -272,12 +276,9 @@ def solar_heat(self, files, method):
             else:
                 Roof_area = 0.8
 
-            print(files[0])
-            print(files[2]['Solar Thermal'])
-            print(type(files[2]))
             candidates=[]
 
-            #print( files[2]['Solar PV']['Efficiency'].max())
+
             eff = float(files[2]['Solar Thermal']['Efficiency'].max())
 
             for index, row in files[2]['Solar Thermal'].iterrows():
@@ -286,12 +287,11 @@ def solar_heat(self, files, method):
                     candidates.append((index,row['Name']))
 
 
-            #panel_efficciency = energy_supply('solar_heat','efficiency')
             selection = Label(self, text = "Your Solar heat panel selection:" + str(candidates[0])).grid(row=11, column = 0)
 
             panel_efficiency = eff
 
-            #panel_efficciency = energy_supply('solar_heat','efficiency')
+
 
             files[0]['sol_h_prod (kWh)'] = files[0]['Rad (W/m^2)'] * Roof_area * files[1]['RnF (m2)'][0] * panel_efficiency/1000
             return files #Fixed 7.11
@@ -304,12 +304,9 @@ def solar_heat(self, files, method):
             else:
                 Roof_area = 0.8
 
-            print(files[0])
-            print(files[2]['Solar Thermal'])
-            print(type(files[2]))
             candidates=[]
 
-            #print( files[2]['Solar PV']['Efficiency'].max())
+
             eff = float(files[2]['Solar Thermal']['Efficiency'].max())
 
             for index, row in files[2]['Solar Thermal'].iterrows():
@@ -318,7 +315,7 @@ def solar_heat(self, files, method):
                     candidates.append((index,row['Name']))
 
 
-            #panel_efficciency = energy_supply('solar_heat','efficiency')
+
             selection = Label(self, text = "Your Solar heat panel selection:" + str(candidates[0])).grid(row=11, column = 0)
 
             panel_efficiency = eff
@@ -337,9 +334,6 @@ def solar_heat(self, files, method):
             else:
                 Roof_area = 0.8
 
-            print(files[0])
-            print(files[2]['Solar Thermal'])
-            print(type(files[2]))
             candidates=[]
 
             #print( files[2]['Solar PV']['Efficiency'].max())
@@ -373,9 +367,9 @@ def solar_electricity(self,files, method):
         if method == "Efficiency":
 
             if int(files[1]['Solar PV']) == 1:
-                Area_var = 0,4
+                Area_var = 0.4
             else:
-                Area_var = 0,8
+                Area_var = 0.8
             #print(files[0])
             #print(files[2]['Solar PV'])
             #print(type(files[2]))
@@ -390,15 +384,15 @@ def solar_electricity(self,files, method):
             selection = Label(self, text = "Your Solar PV selection:" + str(candidates[0])).grid(row=10, column = 0)
 
             panel_efficiency = eff
-            files[0]['sol_e_product (kWh)'] = files[0]['Rad (W/m^2)'] * 0.5 * files[1]['RnF (m2)'][0]* Area_var * panel_efficiency/1000
+            files[0]['sol_e_product (kWh)'] = files[0]['Rad (W/m^2)'] * files[1]['RnF (m2)'][0] * Area_var * panel_efficiency/1000
             return files #Fixed 7.11
 
         elif method =="Price":
 
             if int(files[1]['Solar PV']) == 1:
-                Area_var = 0,4
+                Area_var = 0.4
             else:
-                Area_var = 0,8
+                Area_var = 0.8
             candidates=[]
             eff = []
             price = float(files[2]['Solar PV']['Price (€)'].min())
@@ -412,15 +406,15 @@ def solar_electricity(self,files, method):
             selection = Label(self, text = "Your Solar PV selection:" + str(candidates[0])).grid(row=10, column = 0)
 
             panel_efficiency = eff
-            files[0]['sol_e_product (kWh)'] = files[0]['Rad (W/m^2)'] * 0.5 * files[1]['RnF (m2)'][0] * Area_var * float(eff[0])/1000
+            files[0]['sol_e_product (kWh)'] = files[0]['Rad (W/m^2)'] * files[1]['RnF (m2)'][0] * Area_var * float(eff[0])/1000
             return files
 
         elif method == "Default":
 
             if int(files[1]['Solar PV']) == 1:
-                Area_var = 0,4
+                Area_var = 0.4
             else:
-                Area_var = 0,8
+                Area_var = 0.8
 
 
             candidates=[]
@@ -434,7 +428,7 @@ def solar_electricity(self,files, method):
             selection = Label(self, text = "Your Solar PV selection:" + str(candidates[0])).grid(row=10, column = 0)
 
             panel_efficiency = eff
-            files[0]['sol_e_product (kWh)'] = files[0]['Rad (W/m^2)'] * 0.5 * files[1]['RnF (m2)'][0] * Area_var * panel_efficiency/1000
+            files[0]['sol_e_product (kWh)'] = files[0]['Rad (W/m^2)'] * files[1]['RnF (m2)'][0] * Area_var * panel_efficiency/1000
             return files #Fixed 7.11
         else:
             return files

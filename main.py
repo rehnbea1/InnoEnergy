@@ -169,8 +169,7 @@ class StartPage(tk.Frame):
 
 
         method = StringVar()
-        list = ["Default" , "Efficiency","Price"]
-
+        list = ["Default","Efficiency","Price"]
         drop = OptionMenu(self, method, *list).grid(row=7,column=0)
         confirm = Button(self, text= "confirm", command = lambda : self.display(method,files)).grid(row=7,column=1)
 
@@ -196,6 +195,7 @@ class StartPage(tk.Frame):
         #my_label.pack()
         #file1.pack()
         #file2.pack()
+        
     def show(self,clicked):
         print(clicked.get())
         selection1 = clicked.get()
