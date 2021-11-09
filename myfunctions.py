@@ -236,30 +236,31 @@ def lighting_consumtion(self, files):
             list.append((index, row['Name'],row['Power (W)'],  row['Hours']))
     print(list)
 
-    label1 = Label(self, text ="Found following suitable items: ").grid(column = 0, sticky="W")
-    label2 = Label(self, text = " ITEM  ,   NAME    ,   Power (W)   ,   Lifetime").grid(column = 0, sticky="W")
-    i = 11
+    label1 = self.text_entry("Found following suitable items: \n")
+    label2 = self.text_entry(" ITEM  ,   NAME    ,   Power (W)   ,   Lifetime \n")
+    i = 20
     for item in list:
-        label3 = Label(self, text = item).grid(row= i, column = 0, sticky="W")
+        label3 = self.text_entry( str(item) + "\n")
         i+=1
 
-    promt = Label(self, text= " select your lighting application").grid(sticky="W")
+    promt = self.text_entry("Select your lighting application \n")
     entry = StringVar()
-    box = Entry(self, textvariable = entry).grid(sticky="W")
-    confirm = Button(self, text= "Submit", command = lambda : submit(self,entry,files, list)).grid(sticky="W")
-
+    box = Entry(self, textvariable = entry).grid(sticky="E")
+    confirm = Button(self, text= "Submit", command = lambda : submit(self,entry,files, list)).grid(sticky="E")
 
     return files
 
 def submit(self,entry,files, list):
     a = int(entry.get())
-
     for item in list:
         if item[0] == a:
-            label4 = Label(self, text =list[item]).grid(column=0, sticky="W")
+            #print("item[0]",list[item])
+            label4 = self.text_entry(("Submitted: \n" + str(item)))
+
 
 
     print("Entry:", entry.get())
+
     print(type(a))
 
     return
@@ -287,7 +288,7 @@ def solar_heat(self, files, method):
                     candidates.append((index,row['Name']))
 
 
-            selection = Label(self, text = "Your Solar heat panel selection:" + str(candidates[0])).grid(row=11, column = 0)
+            selection = self.text_entry("Your Solar heat panel selection:" + str(candidates[0])+"\n")
 
             panel_efficiency = eff
 
@@ -316,7 +317,7 @@ def solar_heat(self, files, method):
 
 
 
-            selection = Label(self, text = "Your Solar heat panel selection:" + str(candidates[0])).grid(row=11, column = 0)
+            selection = self.text_entry("Your Solar heat panel selection:" + str(candidates[0])+"\n")
 
             panel_efficiency = eff
 
@@ -346,7 +347,7 @@ def solar_heat(self, files, method):
 
 
             #panel_efficciency = energy_supply('solar_heat','efficiency')
-            selection = Label(self, text = "Your Solar heat panel selection:" + str(candidates[0])).grid(row=11, column = 0)
+            selection = self.text_entry("Your Solar heat panel selection:" + str(candidates[0])+"\n")
 
             panel_efficiency = eff
 
@@ -381,7 +382,7 @@ def solar_electricity(self,files, method):
                 if row['Efficiency'] == eff:
                     candidates.append((index,row['Name']))
 
-            selection = Label(self, text = "Your Solar PV selection:" + str(candidates[0])).grid(row=10, column = 0)
+            selection = self.text_entry("Your Solar PV selection:\n" + str(candidates[0]) + "\n")
 
             panel_efficiency = eff
             files[0]['sol_e_product (kWh)'] = files[0]['Rad (W/m^2)'] * files[1]['RnF (m2)'][0] * Area_var * panel_efficiency/1000
@@ -403,7 +404,7 @@ def solar_electricity(self,files, method):
                     candidates.append((index,row['Name']))
                     eff.append(row['Efficiency'])
 
-            selection = Label(self, text = "Your Solar PV selection:" + str(candidates[0])).grid(row=10, column = 0)
+            selection = self.text_entry("Your Solar PV selection: \n" + str(candidates[0])+"\n")
 
             panel_efficiency = eff
             files[0]['sol_e_product (kWh)'] = files[0]['Rad (W/m^2)'] * files[1]['RnF (m2)'][0] * Area_var * float(eff[0])/1000
@@ -425,7 +426,7 @@ def solar_electricity(self,files, method):
                 if row['Efficiency'] == eff:
                     candidates.append((index,row['Name']))
 
-            selection = Label(self, text = "Your Solar PV selection:" + str(candidates[0])).grid(row=10, column = 0)
+            selection = self.text_entry("Your Solar PV selection: \n" + str(candidates[0])+"\n")
 
             panel_efficiency = eff
             files[0]['sol_e_product (kWh)'] = files[0]['Rad (W/m^2)'] * files[1]['RnF (m2)'][0] * Area_var * panel_efficiency/1000
@@ -478,7 +479,7 @@ def wind_energy(self, files, method):
                     else:
                         pass
 
-                selection = Label(self, text = "Your Wind power selection:" + str(selection)).grid(row=12, column = 0)
+                selection = self.text_entry("Your Wind power selection:" + str(selection))
 
                 Air_density = 1.2 #kg/m3
                 efficiency = 0.5

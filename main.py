@@ -12,7 +12,7 @@ matplotlib.use("TkAgg")
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 from matplotlib.figure import Figure
 from PIL import ImageTk, Image
-LARGE_FONT = ("Verdana", 8)
+LARGE_FONT = ("Verdana", 12)
 
 
 class File:
@@ -33,28 +33,37 @@ class File:
                     list.append(a)
             self.headers = list
 
-
 class Window(tk.Tk):
 
     def __init__(self, *args, **kwargs):
 
         tk.Tk.__init__(self, *args,**kwargs)
+        tk.Tk.wm_title(self,"Energy Management System ")
 
-        container = tk.Frame(self)
-        container.pack(side="top", fill="both",expand= True)
+        container = tk.Frame(self, background = "grey", highlightbackground="black", highlightthickness=3)
+        container.pack(side="bottom", fill="both",expand= True)
         container.grid_rowconfigure(0, weight=1)
         container.grid_columnconfigure(0, weight=1)
 
+        #my_canvas = Canvas(container)
+        #my_canvas.pack(fill="both",expand=True)
+        #my_scrollbar = ttk.Scrollbar(self, orient="vertical", command = my_canvas.yview)
+        #my_scrollbar.pack(side=RIGHT,fill=Y)
+        #my_canvas.configure(yscrollcommand=my_scrollbar.set)
+        #my_canvas.bind('<Configure>', lambda e:my_canvas.configure(scrollregion=my_canvas.bbox('all')))
+        #second_frame = tk.Frame(my_canvas)
+        #my_canvas.create_window((0,0),window=second_frame,anchor="nw")
 
-        self.geometry("350x350")
-        self.title("Energy Management System ")
+#       my_scrollbar = ttk.Scrollbar(main_frame, orient=VERTICAL, command = my_canvas.yscrollcommand).pack(side=RIGHT,fill=Y)
 
-        render = ImageTk.PhotoImage(Image.open("House.png"))
-        img = Label(self, image=render)
-        img.image = render
-        img.pack()
-        #img.place(x=100,y=10)
+        self.geometry("7000x700")
 
+
+        self.image = Image.open('House.png')
+        self.main_img = ImageTk.PhotoImage(self.image)
+        label = Label(self, image = self.main_img)
+        label.image = self.image
+        label.pack(anchor = 'c')
 
         self.shared_data = {'file1':StringVar(), 'file2': StringVar(), 'DATABASE1': StringVar(), 'DATABASE2':StringVar(),'DATABASE3':StringVar(), 'options':StringVar(), 'Roof':StringVar()}
 
@@ -64,7 +73,8 @@ class Window(tk.Tk):
 
             frame = F(container,self)
             self.frames[F] = frame
-            frame.grid(row = 0, column = 0, sticky = "nsew")
+
+            frame.grid(row = 0, column = 0, sticky = "nsew", padx=5, pady=5)
 
         self.show_frame(StartPage)
 
@@ -78,8 +88,53 @@ class StartPage(tk.Frame):
     def __init__(self,parent,controller):
 
         tk.Frame.__init__(self,parent)
+
+
         label = tk.Label(self,text="StartPage", font= LARGE_FONT)
-        label.grid(row=1,pady=10)
+        label.grid(row=0,sticky="NW")
+
+        Page_two = Button(self, text="PageOne",
+                        command = lambda: controller.show_frame(PageOne)).grid(row =1,sticky='SW')
+
+        Graph_page = Button(self, text="GraphPage",
+                        command = lambda: controller.show_frame(GraphPage)).grid( sticky='SW')
+
+        destroy = Button(self,text="Exit program",
+                        command = lambda: gui.destroy()).grid( sticky='SW')
+
+        #tk.Frame(self, highlightbackground="green", highlightcolor="green", highlightthickness=5)
+
+
+
+        #controller.shared_data.update({'options':options})
+        #geography =  sticky='NW', padx=5, pady=5
+
+
+
+
+
+
+
+
+
+class PageOne(tk.Frame):
+
+    def __init__(self,parent,controller):
+        tk.Frame.__init__(self,parent)
+
+        self.text_box = Text(self,width=80, height=10, bg ="grey",)
+        self.text_box.configure(state='disabled')
+        self.text_box.grid()
+
+
+        label = tk.Label(self,text="PageOne", font= LARGE_FONT)
+        label.grid(sticky='NW', padx=2, pady=2)
+
+        Button1 = Button(self, text="Back to Home",
+                        command = lambda: controller.show_frame(StartPage)).grid(row = 1, sticky='NW', padx=2, pady=2)
+        Button2 = Button(self, text='Browse file_1',
+                        command = lambda: self.Delta1()).grid(sticky='SW', padx=2, pady=2)
+
 
 
         self.file1 = controller.shared_data['file1']
@@ -90,21 +145,11 @@ class StartPage(tk.Frame):
         self.options = controller.shared_data['options']
         self.Roof = controller.shared_data['Roof']
 
-        #controller.shared_data.update({'options':options})
-
-        file1 = Button(self, text='Browse file_1',
-                        command = lambda: self.Delta1()).grid(row = 2)
-
-        Page_two = Button(self, text="PageOne",
-                        command = lambda: controller.show_frame(PageOne)).grid(row = 3)
-
-        Graph_page = Button(self, text="GraphPage",
-                        command = lambda: controller.show_frame(GraphPage)).grid(row = 4)
-
-        destroy = Button(self,text="Exit program",
-                        command = lambda: gui.destroy()).grid(row=5)
-
-
+    def text_entry(self,string):
+        self.text_box.configure(state='normal')
+        self.text_box.insert(END,str(string) + "\n")
+        self.text_box.configure(state='disabled')
+        return
 
     def Delta1(self):
 
@@ -164,13 +209,13 @@ class StartPage(tk.Frame):
 
         clicked = StringVar()
         clicked.set("Select item")
-        drop = OptionMenu(self, clicked, *options).grid(row=6, column = 0)
-        mybutton = Button(self,text ='selection', command = lambda: StartPage.show(self,clicked)).grid(row=6,column =1)
+        drop = OptionMenu(self, clicked, *options).grid(row=6, column = 0, sticky="W")
+        mybutton = Button(self,text ='selection', command = lambda: self.show(self,clicked)).grid(row=6,column =1)
 
 
         method = StringVar()
         list = ["Default","Efficiency","Price"]
-        drop = OptionMenu(self, method, *list).grid(row=7,column=0)
+        drop = OptionMenu(self, method, *list).grid(row=7,column=0, sticky="W")
         confirm = Button(self, text= "confirm", command = lambda : self.display(method,files)).grid(row=7,column=1)
 
 
@@ -195,7 +240,7 @@ class StartPage(tk.Frame):
         #my_label.pack()
         #file1.pack()
         #file2.pack()
-        
+
     def show(self,clicked):
         print(clicked.get())
         selection1 = clicked.get()
@@ -204,11 +249,19 @@ class StartPage(tk.Frame):
 
     def show1(self, files, method, var1,var2,var3,var4,var5):
 
-        textA = Label(self, text = "Wind power: " + str(var1.get())).grid(row=9, column=3)
-        textb = Label(self, text = "Solar PV: " + str(var2.get())).grid(row=9, column=4)
-        textc = Label(self, text = "Solar Heat panels: " + str(var3.get())).grid(row=10, column=3)
-        textd = Label(self, text = "Nuclear: " + str(var4.get())).grid(row=10, column=4)
-        texte = Label(self, text = "Ground heat: " + str(var5.get())).grid(row=11, column=3)
+        textA = self.text_entry("Wind power: " + str(var1.get())+"\n")
+        textB = self.text_entry("Solar PV: " + str(var2.get())+"\n")
+        textC = self.text_entry("Solar Heat panels: " + str(var3.get())+"\n")
+        textD = self.text_entry("Nuclear: " + str(var4.get())+"\n")
+        textE = self.text_entry("Ground heat: " + str(var5.get())+"\n")
+
+
+
+        #textA = Label(self, text = "Wind power: " + str(var1.get()))        .grid(row=11, column=3, sticky='W')
+        #textb = Label(self, text = "Solar PV: " + str(var2.get()))          .grid(row=11, column=4, sticky='W')
+        #textc = Label(self, text = "Solar Heat panels: " + str(var3.get())) .grid(row=11, column=5, sticky='W')
+        #textd = Label(self, text = "Nuclear: " + str(var4.get()))           .grid(row=11, column=6, sticky='W')
+        #texte = Label(self, text = "Ground heat: " + str(var5.get()))       .grid(row=11, column=7, sticky='W')
 
 
 
@@ -245,28 +298,19 @@ class StartPage(tk.Frame):
         var5 = IntVar()
 
 
-        L = Label(self, text="What primary energies are there available?").grid(row = 3, column = 3)
-        wind        = Checkbutton(self, text = "Wind power",        variable = var1).grid(row = 4, column = 3)
-        solar_pv    = Checkbutton(self, text = "Solar PV",          variable = var2).grid(row = 4, column = 4)
-        solar_heat  = Checkbutton(self, text = "Solar Heat panels", variable = var3).grid(row = 5, column = 3)
-        nuclear     = Checkbutton(self, text = "Nuclear",           variable = var4).grid(row = 5, column = 4)
-        Ground_heat = Checkbutton(self, text = "Ground heat",       variable = var5).grid(row = 6, column = 3)
+        L = self.text_entry("Select primary energy sources")
+        #L = Label(self, text="What primary energies are there available?").grid(row = 10, column = 0, columnspan=3, sticky='W')
+        wind        = Checkbutton(self, text = "Wind power",        variable = var1).grid(row = 11, column = 0, sticky='W')
+        solar_pv    = Checkbutton(self, text = "Solar PV",          variable = var2).grid(row = 11, column = 1, sticky='W')
+        solar_heat  = Checkbutton(self, text = "Solar Heat panels", variable = var3).grid(row = 11, column = 2, sticky='W')
+        nuclear     = Checkbutton(self, text = "Nuclear",           variable = var4).grid(row = 11, column = 3, sticky='W')
+        Ground_heat = Checkbutton(self, text = "Ground heat",       variable = var5).grid(row = 11, column = 4, sticky='W')
 
 
         print("-----------------------------------")
 
-        Save = Button(self, text = "Save selection", command = lambda: StartPage.show1(self, files, method,var1,var2,var3,var4,var5)).grid(row = 7, column = 3)
+        Save = Button(self, text = "Save selection", command = lambda: self.show1(files, method,var1,var2,var3,var4,var5)).grid(row = 12, sticky="SE")
 
-
-class PageOne(tk.Frame):
-
-    def __init__(self,parent,controller):
-        tk.Frame.__init__(self,parent)
-        label = tk.Label(self,text="PageOne", font= LARGE_FONT)
-        label.grid(row=1,pady=10)
-
-        Button1 = Button(self, text="Back to Home",
-                        command = lambda: controller.show_frame(StartPage)).grid(row = 3)
 
 
 class GraphPage(tk.Frame):
@@ -281,7 +325,7 @@ class GraphPage(tk.Frame):
         #tk.Label(self, text = "selected file : ").grid(row=10) # text assigns a permanent value
 
 
-        Back_to_home_btn = Button(self, text="Back to Home",command = lambda: controller.show_frame(StartPage)).grid(row = 3)
+        Back_to_home_btn = Button(self, text="Back to Home",command = lambda: controller.show_frame(StartPage)).grid(sticky='NE', padx=2, pady=2)
 
 
     def plot_graph(self):
