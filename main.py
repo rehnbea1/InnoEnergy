@@ -126,7 +126,6 @@ class PageOne(tk.Frame):
         self.text_box.configure(state='disabled')
         self.text_box.grid()
 
-
         label = tk.Label(self,text="PageOne", font= LARGE_FONT)
         label.grid(sticky='NW', padx=2, pady=2)
 
@@ -137,19 +136,20 @@ class PageOne(tk.Frame):
 
 
 
-        self.file1 = controller.shared_data['file1']
-        self.file2 = controller.shared_data['file2']
-        self.DATABASE1 = controller.shared_data['DATABASE1']
-        self.DATABASE2 = controller.shared_data['DATABASE2']
-        self.DATABASE3 = controller.shared_data['DATABASE3']
-        self.options = controller.shared_data['options']
-        self.Roof = controller.shared_data['Roof']
+        #self.file1 = controller.shared_data['file1']
+        #self.file2 = controller.shared_data['file2']
+        #self.DATABASE1 = controller.shared_data['DATABASE1']
+        #self.DATABASE2 = controller.shared_data['DATABASE2']
+        #self.DATABASE3 = controller.shared_data['DATABASE3']
+        #self.options = controller.shared_data['options']
+        #self.Roof = controller.shared_data['Roof']
 
     def text_entry(self,string):
         self.text_box.configure(state='normal')
         self.text_box.insert(END,str(string) + "\n")
         self.text_box.configure(state='disabled')
         return
+
 
     def Delta1(self):
 
@@ -167,13 +167,7 @@ class PageOne(tk.Frame):
         df = myfunctions.House(gui,DATA1,DATA2)
         df[0]['spot-price €/kWh'] = [0.00213,0.00220,0.00217,0.0217,0.00222,0.00235,0.00421,0.001254,0.001451,0.001641,0.001650,0.001580,0.001490,0.001389,0.001439,0.001486,0.001611,0.002784,0.003543,0.003377,0.001559,0.001332,0.001288,0.001219]
 
-
-
-
-
         #save_data = myfunctions.Get_file_info(House_data[0], House_data[1])
-
-
         DATABASES = myfunctions.import_databases(gui)
 
         #HALVFÄRDIGT STUFF
@@ -192,18 +186,15 @@ class PageOne(tk.Frame):
         DATABASE2 = File(DATABASES[1])
         DATABASE3 = File(DATABASES[2])
 
-
-        print(FILE1.file.columns)
         options = myfunctions.get_graph_options(FILE1,FILE2, DATABASE1,DATABASE2)
 
-
-        self.file1.set(FILE1.file)
-        self.file2.set(FILE2.file)
-        self.DATABASE1.set(DATABASE1.file)
-        self.DATABASE2.set(DATABASE2.file)
-        self.DATABASE3.set(DATABASE3.file)
-        self.options.set(options)
-
+        self.file1 =FILE1.file
+        self.file2 =FILE2.file
+        self.DATABASE1 =DATABASE1.file
+        self.DATABASE2 =DATABASE2.file
+        self.DATABASE3 =DATABASE3.file
+        self.options = options
+        self.files = [self.file1,self.file2,self.DATABASE1,self.DATABASE2,self.DATABASE3]
 
 
 
@@ -246,50 +237,10 @@ class PageOne(tk.Frame):
         selection1 = clicked.get()
         return
 
-
-    def show1(self, files, method, var1,var2,var3,var4,var5):
-
-        textA = self.text_entry("Wind power: " + str(var1.get())+"\n")
-        textB = self.text_entry("Solar PV: " + str(var2.get())+"\n")
-        textC = self.text_entry("Solar Heat panels: " + str(var3.get())+"\n")
-        textD = self.text_entry("Nuclear: " + str(var4.get())+"\n")
-        textE = self.text_entry("Ground heat: " + str(var5.get())+"\n")
-
-
-
-        #textA = Label(self, text = "Wind power: " + str(var1.get()))        .grid(row=11, column=3, sticky='W')
-        #textb = Label(self, text = "Solar PV: " + str(var2.get()))          .grid(row=11, column=4, sticky='W')
-        #textc = Label(self, text = "Solar Heat panels: " + str(var3.get())) .grid(row=11, column=5, sticky='W')
-        #textd = Label(self, text = "Nuclear: " + str(var4.get()))           .grid(row=11, column=6, sticky='W')
-        #texte = Label(self, text = "Ground heat: " + str(var5.get()))       .grid(row=11, column=7, sticky='W')
-
-
-
-        #list = {'Wind power': var1.get(), 'Solar PV':var2.get(),'Solar Heat panels':var3.get(),'Nuclear':var4.get()}
-        print(files[1])
-        files[1]["None"]= var4.get()
-        files[1]['Wind power']= var1.get()
-        files[1]['Solar PV']= var2.get()
-        files[1]['Solar heat panels'] = var3.get()
-        files[1]['Nuclear']= var4.get()
-        files[1]['Ground_heat'] = var5.get()
-
-        #{'Wind power': var1.get()}, {'Solar PV':var2.get()},{'Solar Heat panels':var3.get()},{'Nuclear':var4.get()})
-        print(files[1])
-        method = method.get()
-        print("---––––––––––––––––––––––––")
-        files = myfunctions.solar_electricity(self,files, method)
-        files = myfunctions.solar_heat(self, files, method)
-        files = myfunctions.H_storage(files)
-        files = myfunctions.lighting_consumtion(self,files)
-
-
-        A = myfunctions.analysis(files)
-
-
     def display(self,method,files):
 
         self.selection = method.get()
+        print("metoodju", self.selection)
 
         var1 = IntVar()
         var2 = IntVar()
@@ -310,6 +261,39 @@ class PageOne(tk.Frame):
         print("-----------------------------------")
 
         Save = Button(self, text = "Save selection", command = lambda: self.show1(files, method,var1,var2,var3,var4,var5)).grid(row = 12, sticky="SE")
+
+    def show1(self, files, method, var1,var2,var3,var4,var5):
+
+        textA = self.text_entry("Wind power: " + str(var1.get())+"\n")
+        textB = self.text_entry("Solar PV: " + str(var2.get())+"\n")
+        textC = self.text_entry("Solar Heat panels: " + str(var3.get())+"\n")
+        textD = self.text_entry("Nuclear: " + str(var4.get())+"\n")
+        textE = self.text_entry("Ground heat: " + str(var5.get())+"\n")
+
+
+        #list = {'Wind power': var1.get(), 'Solar PV':var2.get(),'Solar Heat panels':var3.get(),'Nuclear':var4.get()}
+        print(files[1])
+        files[1]["None"]= var4.get()
+        files[1]['Wind power']= var1.get()
+        files[1]['Solar PV']= var2.get()
+        files[1]['Solar heat panels'] = var3.get()
+        files[1]['Nuclear']= var4.get()
+        files[1]['Ground_heat'] = var5.get()
+
+        #{'Wind power': var1.get()}, {'Solar PV':var2.get()},{'Solar Heat panels':var3.get()},{'Nuclear':var4.get()})
+        print(files[1])
+        method = method.get()
+
+        print("---––––––––––––––––––––––––")
+        files = myfunctions.solar_electricity(self, method)
+        myfunctions.solar_heat(self,method)
+        myfunctions.H_storage(self)
+
+        print("Files just nu")
+        print(self.files)
+        myfunctions.lighting_consumtion(self)
+        myfunctions.analysis(self)
+
 
 
 

@@ -223,66 +223,62 @@ def calculate_air_heat_losses(df1,df2):
         list.append(Air_heating)
     return list
 
-def lighting_consumtion(self, files):
+def lighting_consumtion(self):
+
 
     #energy_supply(lighting,... )
-
-    lumens = files[0]['Lighting (lux)']*(files[1]['Height Lights (m)'][0])**2
-    A = lumens/files[0]['Total lapms'] #gives lumen demand per light bulb
+    lumens = self.file1['Lighting (lux)']*(self.file2['Height Lights (m)'][0])**2
+    A = lumens/self.file1['Total lapms'] #gives lumen demand per light bulb
     lum_max = A.max()
     list =[]
-    for index, row in files[4]['Lighting'].iterrows():
+    for index, row in self.DATABASE3['Lighting'].iterrows():
         if row['Lumens (lm)'] >= A.max():
             list.append((index, row['Name'],row['Power (W)'],  row['Hours']))
     print(list)
 
     label1 = self.text_entry("Found following suitable items: \n")
     label2 = self.text_entry(" ITEM  ,   NAME    ,   Power (W)   ,   Lifetime \n")
-    i = 20
+
     for item in list:
         label3 = self.text_entry( str(item) + "\n")
-        i+=1
+
 
     promt = self.text_entry("Select your lighting application \n")
     entry = StringVar()
     box = Entry(self, textvariable = entry).grid(sticky="E")
-    confirm = Button(self, text= "Submit", command = lambda : submit(self,entry,files, list)).grid(sticky="E")
+    confirm = Button(self, text= "Submit", command = lambda : submit(self,entry, list)).grid(sticky="E")
 
-    return files
+    return
 
-def submit(self,entry,files, list):
+def submit(self,entry, list):
     a = int(entry.get())
+
     for item in list:
         if item[0] == a:
             #print("item[0]",list[item])
             label4 = self.text_entry(("Submitted: \n" + str(item)))
 
+            print("item0", item[0])
+            self.variable1 = item[0]
 
 
-    print("Entry:", entry.get())
 
-    print(type(a))
+def solar_heat(self, method):
+    print("---method----", method)
 
-    return
-
-
-def solar_heat(self, files, method):
-    print("method----", method)
-
-    if int(files[1]['Solar heat panels'])==1:
+    if int(self.file2['Solar heat panels'])==1:
 
         if method == "Efficiency":
-            if int(files[1]['Solar PV']) == 1:
+            if int(self.file2['Solar PV']) == 1:
                 Roof_area = 0.4
             else:
                 Roof_area = 0.8
 
             candidates=[]
 
+            eff = float(self.DATABASE1['Solar Thermal']['Efficiency'].max())
 
-            eff = float(files[2]['Solar Thermal']['Efficiency'].max())
-
-            for index, row in files[2]['Solar Thermal'].iterrows():
+            for index, row in self.DATABASE1['Solar Thermal'].iterrows():
 
                 if row['Efficiency'] == eff:
                     candidates.append((index,row['Name']))
@@ -291,93 +287,102 @@ def solar_heat(self, files, method):
             selection = self.text_entry("Your Solar heat panel selection:" + str(candidates[0])+"\n")
 
             panel_efficiency = eff
+            self.file1['sol_h_prod (kWh)'] = self.file1['Rad (W/m^2)'] * Roof_area * self.file2['RnF (m2)'][0] * panel_efficiency/1000
 
+            return  #Fixed 7.11
 
-
-            files[0]['sol_h_prod (kWh)'] = files[0]['Rad (W/m^2)'] * Roof_area * files[1]['RnF (m2)'][0] * panel_efficiency/1000
-            return files #Fixed 7.11
 
         elif method == "Price":
+            print("Entered price")
+            print(self.DATABASE1)
 
-            if int(files[1]['Solar PV']) == 1:
+            if int(self.file2['Solar PV']) == 1:
 
                 Roof_area = 0.4
             else:
                 Roof_area = 0.8
 
-            candidates=[]
 
+            list=[]
+            a= self.DATABASE1['Solar Thermal']['Price (€)'].min()
+            eff = self.DATABASE1['Solar Thermal']['Price (€)'].min()
 
-            eff = float(files[2]['Solar Thermal']['Efficiency'].max())
+            for index, row in self.DATABASE1['Solar Thermal'].iterrows():
+                if row['Price (€)'] == eff:
+                    list.append((index, row['Name'],row['Price (€)'],row['Efficiency']))
 
-            for index, row in files[2]['Solar Thermal'].iterrows():
+            promt = self.text_entry("Select your Solar thermal colector \n")
+            for item in list:
+                label3 = self.text_entry( str(item) + "\n")
 
-                if row['Efficiency'] == eff:
-                    candidates.append((index,row['Name']))
+            entry1 = StringVar()
+            box = Entry(self, textvariable = entry1).grid(sticky="E")
+            confirm = Button(self, text= "Submit", command = lambda : submit_heate(self,entry1, list, Roof_area)).grid(sticky="E")
 
-
-
-            selection = self.text_entry("Your Solar heat panel selection:" + str(candidates[0])+"\n")
-
-            panel_efficiency = eff
-
-            #panel_efficciency = energy_supply('solar_heat','efficiency')
-
-            files[0]['sol_h_prod (kWh)'] = files[0]['Rad (W/m^2)'] * Roof_area * files[1]['RnF (m2)'][0] * panel_efficiency/1000
-
-            return files
+            print("heyy")
 
         elif method =="Default":
 
-            if int(files[1]['Solar PV']) == 1:
+            if int(self.file2['Solar PV']) == 1:
 
                 Roof_area = 0.4
             else:
                 Roof_area = 0.8
 
-            candidates=[]
-
-            #print( files[2]['Solar PV']['Efficiency'].max())
-            eff = float(files[2]['Solar Thermal']['Efficiency'].max())
-
-            for index, row in files[2]['Solar Thermal'].iterrows():
-
+            list=[]
+            eff = float(self.DATABASE1['Solar Thermal']['Efficiency'].max())
+            for index, row in self.DATABASE1['Solar Thermal'].iterrows():
                 if row['Efficiency'] == eff:
-                    candidates.append((index,row['Name']))
+                    print("---------",row)
+                    list.append((index, row['Name'],row['Efficiency']))
 
-
-            #panel_efficciency = energy_supply('solar_heat','efficiency')
-            selection = self.text_entry("Your Solar heat panel selection:" + str(candidates[0])+"\n")
+            label2 = self.text_entry("Your Solar Thermal panel selection")
+            label3 = self.text_entry( str(list[0]) + "\n")
 
             panel_efficiency = eff
 
             #panel_efficciency = energy_supply('solar_heat','efficiency')
 
-            files[0]['sol_h_prod (kWh)'] = files[0]['Rad (W/m^2)'] * Roof_area * files[1]['RnF (m2)'][0] * panel_efficiency/1000
+            self.file2['sol_h_prod (kWh)'] = self.file2['Rad (W/m^2)'] * Roof_area * self.file2['RnF (m2)'][0] * panel_efficiency/1000
 
-            return files
+            self.file1 = self.file2
+            return
 
     else:
-        return files
+        return
+
+def submit_heate(self,entry1, list, Roof_area):
+    print("entered submit heate")
+    a = int(entry1.get())
+    for item in list:
+        if item[0] == a:
+            label4 = self.text_entry(("Submitted: \n" + str(item)))
+
+            panel_efficiency = item[3]
+
+            self.file2['sol_h_prod (kWh)'] = self.file2['Rad (W/m^2)'] * Roof_area * self.file2['RnF (m2)'][0] * panel_efficiency/1000
+    self.file1 = self.file2
+    return
 
 
-def solar_electricity(self,files, method):
 
-    if int(files[1]['Solar PV'])==1:
+def solar_electricity(self, method):
+
+    if int(self.file2['Solar PV'])==1:
 
         if method == "Efficiency":
 
-            if int(files[1]['Solar PV']) == 1:
+            if int(self.file2['Solar heat panels']) == 1:
                 Area_var = 0.4
             else:
                 Area_var = 0.8
             #print(files[0])
-            #print(files[2]['Solar PV'])
-            #print(type(files[2]))
+            #print(self.DATABASE1['Solar PV'])
+            #print(type(self.DATABASE1))
             candidates=[]
-            eff = float(files[2]['Solar PV']['Efficiency'].max())
+            eff = float(self.DATABASE1['Solar PV']['Efficiency'].max())
 
-            for index, row in files[2]['Solar PV'].iterrows():
+            for index, row in self.DATABASE1['Solar PV'].iterrows():
 
                 if row['Efficiency'] == eff:
                     candidates.append((index,row['Name']))
@@ -385,20 +390,22 @@ def solar_electricity(self,files, method):
             selection = self.text_entry("Your Solar PV selection:\n" + str(candidates[0]) + "\n")
 
             panel_efficiency = eff
-            files[0]['sol_e_product (kWh)'] = files[0]['Rad (W/m^2)'] * files[1]['RnF (m2)'][0] * Area_var * panel_efficiency/1000
-            return files #Fixed 7.11
+            self.file1['sol_e_product (kWh)'] = self.file1['Rad (W/m^2)'] * self.file2['RnF (m2)'][0] * Area_var * panel_efficiency/1000
+
+            return  #Fixed 7.11
 
         elif method =="Price":
 
-            if int(files[1]['Solar PV']) == 1:
+            if int(self.file2['Solar heat panels']) == 1:
                 Area_var = 0.4
             else:
                 Area_var = 0.8
+
             candidates=[]
             eff = []
-            price = float(files[2]['Solar PV']['Price (€)'].min())
+            price = float(self.DATABASE1['Solar PV']['Price (€)'].min())
 
-            for index, row in files[2]['Solar PV'].iterrows():
+            for index, row in self.DATABASE1['Solar PV'].iterrows():
 
                 if row['Price (€)'] == price:
                     candidates.append((index,row['Name']))
@@ -407,21 +414,21 @@ def solar_electricity(self,files, method):
             selection = self.text_entry("Your Solar PV selection: \n" + str(candidates[0])+"\n")
 
             panel_efficiency = eff
-            files[0]['sol_e_product (kWh)'] = files[0]['Rad (W/m^2)'] * files[1]['RnF (m2)'][0] * Area_var * float(eff[0])/1000
-            return files
+            self.file1['sol_e_product (kWh)'] = self.file1['Rad (W/m^2)'] * self.file2['RnF (m2)'][0] * Area_var * float(eff[0])/1000
+            return
 
         elif method == "Default":
 
-            if int(files[1]['Solar PV']) == 1:
+            if int(self.file2['Solar PV']) == 1:
                 Area_var = 0.4
             else:
                 Area_var = 0.8
 
 
             candidates=[]
-            eff = float(files[2]['Solar PV']['Efficiency'].max())
+            eff = float(self.DATABASE1['Solar PV']['Efficiency'].max())
 
-            for index, row in files[2]['Solar PV'].iterrows():
+            for index, row in self.DATABASE1['Solar PV'].iterrows():
 
                 if row['Efficiency'] == eff:
                     candidates.append((index,row['Name']))
@@ -429,32 +436,32 @@ def solar_electricity(self,files, method):
             selection = self.text_entry("Your Solar PV selection: \n" + str(candidates[0])+"\n")
 
             panel_efficiency = eff
-            files[0]['sol_e_product (kWh)'] = files[0]['Rad (W/m^2)'] * files[1]['RnF (m2)'][0] * Area_var * panel_efficiency/1000
-            return files #Fixed 7.11
+            self.file1['sol_e_product (kWh)'] = self.file1['Rad (W/m^2)'] * self.file2['RnF (m2)'][0] * Area_var * panel_efficiency/1000 #
+            return #Fixed 7.11
         else:
-            return files
+            return
 
     else:
-        return files
+        return
 
 
 
-def wind_energy(self, files, method):
+def wind_energy(self, method):
     #finds the wind generator with the closest max speed to the cut of speed, in other words the one with a peak capacity that is most optimised to the current wind
 
-    if int(files[1]['Wind power'])==1:
+    if int(self.file2['Wind power'])==1:
 
-        print(files[0])
-        print(files[2])
+        print(self.file2)
+        print(self.DATABASE1)
         #print(files[0])
-        #print(type(files[2]))
+        #print(type(self.DATABASE1))
         candidates={}
 
-        #print( files[2]['Solar PV']['Efficiency'].max())
-        wind_max = float(files[0]['Wind speed'].max())
-        wind_min = float(files[0]['Wind speed'].min())
+        #print( self.DATABASE1['Solar PV']['Efficiency'].max())
+        wind_max = float(self.file2['Wind speed'].max())
+        wind_min = float(self.file2['Wind speed'].min())
 
-        for index, row in files[2]['Wind Turbine'].iterrows():
+        for index, row in self.DATABASE1['Wind Turbine'].iterrows():
             print("-----------------")
 
             cut_of_ratio = wind_max/int(row['Cut-off speed (m/s)'])
@@ -474,7 +481,7 @@ def wind_energy(self, files, method):
                 for item in candidates.items():
 
                     if item[1] == best:
-                        selection = files[2]['Wind Turbine'].iloc[item[0]]['Name']
+                        selection = self.DATABASE1['Wind Turbine'].iloc[item[0]]['Name']
 
                     else:
                         pass
@@ -485,29 +492,29 @@ def wind_energy(self, files, method):
                 efficiency = 0.5
                 Area = 3.14*1.5**2 #pi*1,5m
 
-                files[0]['Wind_e_prod (kWh)'] = Air_density * 0.5 * (files[0]['Wind speed'])**3 * efficiency * Area/1000
+                self.file2['Wind_e_prod (kWh)'] = Air_density * 0.5 * (self.file2['Wind speed'])**3 * efficiency * Area/1000
 
 
             else:
                 print("no suitable wind power alternatives")
-                return files
-            print(files[0])
-            return(files)
-        #return files #Fixed 7.11
+                return
+
+            return
+         #Fixed 7.11
 
     else:
-        return files
+        return
 
-def H_storage(files):
+def H_storage(self):
 
-    if int(files[1]['Solar heat panels']) == 1 and int(files[1]['Ground_heat']) == 1 :
+    if int(self.file2['Solar heat panels']) == 1 and int(self.file2['Ground_heat']) == 1 :
 
         print("entered heat_storage")
 
-        files[0]['Heat_storage'] = 0
+        self.file1['Heat_storage'] = 0
         storage = {}
 
-        storage['energy_shortage (kWh)'] = files[0]['Heat_e (kWh)']+files[0]['sol_h_prod (kWh)']
+        storage['energy_shortage (kWh)'] = self.file1['Heat_e (kWh)']+self.file1['sol_h_prod (kWh)']
 
         place_holder = []
         place_holder.append(0)
@@ -515,7 +522,7 @@ def H_storage(files):
         for x in range(len(storage['energy_shortage (kWh)'])):
 
             A = storage['energy_shortage (kWh)'][x]
-            B = files[0]['Heat_storage'][x]
+            B = self.file1['Heat_storage'][x]
             C = B+A
 
             if  C > 0:
@@ -550,13 +557,13 @@ def H_storage(files):
                 place_holder.append(0) == 0
             #print("place_holder", place_holder)
         place_holder.pop(0)
-        files[0]['Heat_storage'] = place_holder
+        self.file1['Heat_storage'] = place_holder
 
 
-        return files
+        return
     else:
         print("No heat production available to store!")
-        return files #Fixed 8.11
+        return  #Fixed 8.11
 
 def import_databases(gui):
     print("entered import_databases")
@@ -574,13 +581,13 @@ def get_graph_options(FILE1, FILE2,DATABASE1,DATABASE2):
     return headers
 
 
-def analysis(files):
+def analysis(self):
     print("entered new_funct")
     #print(files[3])
     print("––––––––––––––––––––––––––––––––––––––")
     #print(files)
-    Data = [files[0],files[1]]
-    Databases = [files[2],files[3],files[4]]
+    Data = [self.file1,self.file2]
+    Databases = [self.DATABASE1,self.DATABASE2,self.DATABASE3]
 
     for items in Databases:
         print(items.keys())
