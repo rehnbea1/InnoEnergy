@@ -165,14 +165,15 @@ class PageOne(tk.Frame):
         #file2 = Button(gui, text='Browse file_2', command = lambda:myfunctions.Delta2(gui,DATA))
         #file2.grid(row = 2, column = 0, pady =10)
         DATA2 = myfunctions.read_file("/Users/albertrehnberg/Downloads/Static_Data.csv",gui)
-        df = myfunctions.House(gui,DATA1,DATA2)
+        DATABASES = myfunctions.import_databases(gui)
+        df = myfunctions.House(self,gui,DATA1,DATA2, DATABASES[2])
         df[0]['spot-price €/kWh'] = [0.00213,0.00220,0.00217,0.0217,0.00222,0.00235,0.00421,0.001254,0.001451,0.001641,0.001650,0.001580,0.001490,0.001389,0.001439,0.001486,0.001611,0.002784,0.003543,0.003377,0.001559,0.001332,0.001288,0.001219]
 
         print("initial data")
         print(DATA1)
         print(DATA2)
         #save_data = myfunctions.Get_file_info(House_data[0], House_data[1])
-        DATABASES = myfunctions.import_databases(gui)
+
 
         #HALVFÄRDIGT STUFF
         #disp_data = Button(gui, text='Display data', command = lambda: myfunctions.show_data(gui,DATA))
@@ -202,10 +203,10 @@ class PageOne(tk.Frame):
 
 
 
-        clicked = StringVar()
-        clicked.set("Select item")
-        drop = OptionMenu(self, clicked, *options).grid(row=6, column = 0, sticky="W")
-        mybutton = Button(self,text ='selection', command = lambda: self.show(self,clicked)).grid(row=6,column =1)
+        #clicked = StringVar()
+        #clicked.set("Select item")
+        #drop = OptionMenu(self, clicked, *options).grid(row=6, column = 0, sticky="W")
+        #mybutton = Button(self,text ='selection', command = lambda: self.show(self,clicked)).grid(row=6,column =1)
 
 
         method = StringVar()
@@ -236,10 +237,10 @@ class PageOne(tk.Frame):
         #file1.pack()
         #file2.pack()
 
-    def show(self,clicked):
-        print(clicked.get())
-        selection1 = clicked.get()
-        return
+    #def show(self,clicked):
+    #    print(clicked.get())
+    #    selection1 = clicked.get()
+    #    return
 
     def display(self,method,files):
 

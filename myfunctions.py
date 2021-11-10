@@ -1,5 +1,5 @@
 #fil för antingen styling av guin eller som samlingssida för olika funktioner, vi får se när jag kommit så långt
-#just nu bara en test-sida
+ #just nu bara en test-sida
 import csv
 import tkinter as tk
 from tkinter import *
@@ -107,7 +107,7 @@ def show_data(gui,data):
     #plt.plot(Xaxis,Yaxis)
     plt.show()
 
-def House(gui, df1, df2):
+def House(self,gui, df1, df2, DATABASE3):
     print("Entered: House function")
 
     print("df1 & df2 read correctly")
@@ -138,7 +138,7 @@ def House(gui, df1, df2):
     #Dynamic values
 
     df1 = HLC(df1, df2, heat_loss_radiation)
-    df1 = calc_heat_w_e(df1, df2)
+    df1 = calc_heat_w_e(self,df1, df2, DATABASE3)
     df1 = electricity_consumption(df1, df2)
     df1 = tot_energy_heating(df1, df2)
 
@@ -170,13 +170,51 @@ def Add_par(df2,static_values):
 
     return df2
 
-def calc_heat_w_e(df1,df2):
+def calc_heat_w_e(self,df1,df2, DATABASE3):
+    print(DATABASE3)
+    print(df1)
     print("entered heat water energy calculator")
     #funktion för att hitta temperaturen ur headern här?
-    t_net=40-df2['Twaterin(ºC)'][0]
+    delta_t=40-df2['Twaterin(ºC)'][0]
 
     #calculate energy to heat up hot water:
-    df1['Water(kW)'] = df1['Hot Water @ 40 C'] * t_net*4.186
+    df1['Water(kW)'] = df1['Hot Water @ 40 C'] * delta_t*4.186/3.600
+
+    eff = df1['Water(kW)'].max()
+    print(eff)
+    list =[]
+    for index, row in DATABASE3['HotWater'].iterrows():
+        print(row['Power (W)'])
+        print(row['Final Energy'])
+
+        if row['Power (W)'] > eff and str(row['Final Energy']) == "Electricity":
+            print("YES")
+            list.append((index, row['Name'],row['Power (W)']))
+        else:
+            print("heater Error")
+    print(list)
+    list2 =[]
+    for item in list:
+        print(item[2])
+        list2.append(item[2])
+
+    minst = min(list2)
+
+    for item in list:
+        if item[2] == minst:
+            self.text_entry("Selected hot water heater: \n")
+            self.text_entry(item)
+
+
+
+
+
+
+
+
+
+
+
     return df1
 
 def electricity_consumption(df1, df2):
@@ -621,7 +659,7 @@ def analysis(self, method):
     Databases = [self.DATABASE1,self.DATABASE2,self.DATABASE3]
 
     cooking_application(self, method)
-    heating_management(self)
+    total_electricity(self)
 
     for items in Databases:
         print(items.keys())
@@ -676,5 +714,5 @@ def cooking_application(self, method):
 
 
 
-def heating_management(self):
+def total_electricity(self):
     pass
