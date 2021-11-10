@@ -197,11 +197,10 @@ def energy_supply(crit1, crit2):
 
 def tot_energy_heating(df1, df2):
     print("Entered tot_energy_heating function")
-    OHPH = df2['Qpeople(W)'] #Wh, Occupation_heat_per_hour
-
+    print(df2)
+    OHPH = int(df2['Qpeople(W)']) #Wh, Occupation_heat_per_hour
 
     air_losses = calculate_air_heat_losses(df1,df2)
-
     df1['Heat_e (kWh)'] = ((df1['%AreaHeatingCooling']/100 * df2['Area (m2)'][0] - df1['Occupation'] * OHPH) /1000)-df1['H_loss (kW)'] - air_losses
 
     df1.loc[df1['Occupation'] == 0, 'Heat_e (kWh)'] = df2['null_heat'][0]
@@ -223,14 +222,14 @@ def calculate_air_heat_losses(df1,df2):
         list.append(Air_heating)
     return list
 
+
 def lighting_consumtion(self):
 
-
-    #energy_supply(lighting,... )
     lumens = self.file1['Lighting (lux)']*(self.file2['Height Lights (m)'][0])**2
     A = lumens/self.file1['Total lapms'] #gives lumen demand per light bulb
     lum_max = A.max()
     list =[]
+
     for index, row in self.DATABASE3['Lighting'].iterrows():
         if row['Lumens (lm)'] >= A.max():
             list.append((index, row['Name'],row['Power (W)'],  row['Hours']))
@@ -245,12 +244,14 @@ def lighting_consumtion(self):
 
     promt = self.text_entry("Select your lighting application \n")
     entry = StringVar()
-    box = Entry(self, textvariable = entry).grid(sticky="E")
-    confirm = Button(self, text= "Submit", command = lambda : submit(self,entry, list)).grid(sticky="E")
+    label_box = Label(self, text="insert lighting solution (integer!)").grid(row=18,sticky="W")
+    box = Entry(self, textvariable = entry).grid(row=19,sticky="E", column=1)
 
+    confirm = Button(self, text= "Submit", command = lambda : submit(self,entry, list)).grid(row=19, column=0,sticky="W")
     return
 
 def submit(self,entry, list):
+    print("Entered submit --------------")
     a = int(entry.get())
 
     for item in list:
@@ -259,7 +260,17 @@ def submit(self,entry, list):
             label4 = self.text_entry(("Submitted: \n" + str(item)))
 
             print("item0", item[0])
-            self.variable1 = item[0]
+
+        self.file2['lighting_var']=item[0]
+
+
+        power = item[2]
+
+        self.file1 = self.file1.rename(columns={'Lighting (lux)':'Lighting (kWh)'})
+        self.file1['Lighting (kWh)'] = self.file1['Total lapms']*power/1000
+        print(self.file1)
+
+        return
 
 
 
@@ -316,8 +327,8 @@ def solar_heat(self, method):
                 label3 = self.text_entry( str(item) + "\n")
 
             entry1 = StringVar()
-            box = Entry(self, textvariable = entry1).grid(sticky="E")
-            confirm = Button(self, text= "Submit", command = lambda : submit_heate(self,entry1, list, Roof_area)).grid(sticky="E")
+            box = Entry(self, textvariable = entry1).grid(row = 20 ,sticky="E")
+            confirm = Button(self, text= "Submit", command = lambda : submit_heate(self,entry1, list, Roof_area)).grid(row=20, sticky="E")
 
             print("heyy")
 
@@ -343,12 +354,13 @@ def solar_heat(self, method):
 
             #panel_efficciency = energy_supply('solar_heat','efficiency')
 
-            self.file2['sol_h_prod (kWh)'] = self.file2['Rad (W/m^2)'] * Roof_area * self.file2['RnF (m2)'][0] * panel_efficiency/1000
+            self.file1['sol_h_prod (kWh)'] = self.file1['Rad (W/m^2)'] * Roof_area * self.file2['RnF (m2)'][0] * panel_efficiency/1000
 
-            self.file1 = self.file2
-            return
-
+            print(self.file1 )
+        else:
+            print("-Error with method-")
     else:
+        print("Error with method")
         return
 
 def submit_heate(self,entry1, list, Roof_area):
@@ -360,8 +372,7 @@ def submit_heate(self,entry1, list, Roof_area):
 
             panel_efficiency = item[3]
 
-            self.file2['sol_h_prod (kWh)'] = self.file2['Rad (W/m^2)'] * Roof_area * self.file2['RnF (m2)'][0] * panel_efficiency/1000
-    self.file1 = self.file2
+            self.file1['sol_h_prod (kWh)'] = self.file1['Rad (W/m^2)'] * Roof_area * self.file2['RnF (m2)'][0] * panel_efficiency/1000
     return
 
 
@@ -445,7 +456,6 @@ def solar_electricity(self, method):
         return
 
 
-
 def wind_energy(self, method):
     #finds the wind generator with the closest max speed to the cut of speed, in other words the one with a peak capacity that is most optimised to the current wind
 
@@ -505,13 +515,20 @@ def wind_energy(self, method):
     else:
         return
 
+def show3(self):
+    print("file1 här")
+    print(self.file1)
+    return
+
 def H_storage(self):
 
     if int(self.file2['Solar heat panels']) == 1 and int(self.file2['Ground_heat']) == 1 :
 
         print("entered heat_storage")
 
-        self.file1['Heat_storage'] = 0
+        btn = Button(self,text="presss", command = lambda: show3(self)).grid(sticky="S")
+
+        self.file1['Heat_storage (kWh)'] = 0
         storage = {}
 
         storage['energy_shortage (kWh)'] = self.file1['Heat_e (kWh)']+self.file1['sol_h_prod (kWh)']
@@ -522,8 +539,9 @@ def H_storage(self):
         for x in range(len(storage['energy_shortage (kWh)'])):
 
             A = storage['energy_shortage (kWh)'][x]
-            B = self.file1['Heat_storage'][x]
+            B = self.file1['Heat_storage (kWh)'][x]
             C = B+A
+            print(C)
 
             if  C > 0:
                 #adds value to storage
@@ -538,7 +556,8 @@ def H_storage(self):
                 #withdraws maximum amount from storage
                 if place_holder[-1] > 0:
             #        print("PH-1",place_holder)
-                    D = place_holder[-1]+C
+                    D = place_holder[-1]+2*C
+                    #effekt 0,5 alltså dubbel stress på batteriet
                     if D > 0:
             #            print("PH-2",place_holder)
                         place_holder.append(D)
@@ -548,16 +567,15 @@ def H_storage(self):
                 elif place_holder[-1] < 0:
                     place_holder.append(0)
             #        print("placeholder index is smaller than 0?")
-                    pass
+
                 elif place_holder[-1] == 0:
                     place_holder.append(0)
-                    pass
-            else:
 
+            else:
                 place_holder.append(0) == 0
             #print("place_holder", place_holder)
         place_holder.pop(0)
-        self.file1['Heat_storage'] = place_holder
+        self.file1['Heat_storage (kWh)'] = place_holder
 
 
         return
@@ -581,18 +599,82 @@ def get_graph_options(FILE1, FILE2,DATABASE1,DATABASE2):
     return headers
 
 
-def analysis(self):
+
+
+def show2(self):
+    print("Text",self.file2)
+    return
+
+def analysis(self, method):
     print("entered new_funct")
-    #print(files[3])
     print("––––––––––––––––––––––––––––––––––––––")
-    #print(files)
+    button = Button(self, text ="press", command=lambda:show2(self))
+    button.grid(sticky="s")
+    #print(files[3])
+
+    print(self.file1)
+    print("––––––––––––––––––––––––––––––––––––––")
+    print("––––––––––––––––––––––––––––––––––––––")
+    print("––––––––––––––––––––––––––––––––––––––")
+
     Data = [self.file1,self.file2]
     Databases = [self.DATABASE1,self.DATABASE2,self.DATABASE3]
+
+    cooking_application(self, method)
+    heating_management(self)
 
     for items in Databases:
         print(items.keys())
     #print(Data[1].columns)
 
+
     print("––––––––––––––––––––––––––––––––––––––")
     print("––––––––––––––––––––––––––––––––––––––")
     #print(files)
+
+
+
+
+def cooking_application(self, method):
+    if method == "Efficiency":
+        A_max = float(self.DATABASE3['Cooking']['Efficiency'].max())
+        list =[]
+        print(self.DATABASE3['Cooking'])
+        for index, row in self.DATABASE3['Cooking'].iterrows():
+
+            print(row['Final Energy'])
+            if row['Efficiency'] == A_max and str(row['Final Energy']) == 'Electricity':
+
+                list.append((index,row['Name'],row['Efficiency'],row['Price (€)']))
+
+        promt = self.text_entry("Your Cooking device: \n")
+        promt2 = self.text_entry(list[0][1])
+
+        self.file2['Cooker'] = list[0][0]
+        print("ok")
+        print(self.file2)
+
+    if method == "Price":
+        A_max = float(self.DATABASE3['Cooking']['Price (€)'].min())
+        list =[]
+        print(self.DATABASE3['Cooking'])
+        for index, row in self.DATABASE3['Cooking'].iterrows():
+
+            if row['Price (€)'] == A_max and str(row['Final Energy']) == 'Electricity':
+
+                list.append((index,row['Name'],row['Efficiency'],row['Price (€)']))
+
+        promt = self.text_entry("Your Cooking device: \n")
+        promt2 = self.text_entry(list[0][1])
+
+        self.file2['Cooker'] = list[0][0]
+
+        print("ok")
+        print(self.file2)
+
+
+
+
+
+def heating_management(self):
+    pass

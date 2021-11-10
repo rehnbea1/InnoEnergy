@@ -40,7 +40,7 @@ class Window(tk.Tk):
         tk.Tk.__init__(self, *args,**kwargs)
         tk.Tk.wm_title(self,"Energy Management System ")
 
-        container = tk.Frame(self, background = "grey", highlightbackground="black", highlightthickness=3)
+        container = tk.Frame(self, highlightbackground="black", highlightthickness=2)
         container.pack(side="bottom", fill="both",expand= True)
         container.grid_rowconfigure(0, weight=1)
         container.grid_columnconfigure(0, weight=1)
@@ -122,20 +122,20 @@ class PageOne(tk.Frame):
     def __init__(self,parent,controller):
         tk.Frame.__init__(self,parent)
 
-        self.text_box = Text(self,width=80, height=10, bg ="grey",)
+        self.text_box = Text(self,width=80, height=20, bg ="grey",)
         self.text_box.configure(state='disabled')
-        self.text_box.grid()
-
+        self.text_box.grid(column=0,sticky="E", columnspan=7)
+        self.lighting_var  = StringVar()
         label = tk.Label(self,text="PageOne", font= LARGE_FONT)
         label.grid(sticky='NW', padx=2, pady=2)
 
         Button1 = Button(self, text="Back to Home",
-                        command = lambda: controller.show_frame(StartPage)).grid(row = 1, sticky='NW', padx=2, pady=2)
+                        command = lambda: controller.show_frame(StartPage)).grid(row = 1, sticky='NW')
         Button2 = Button(self, text='Browse file_1',
-                        command = lambda: self.Delta1()).grid(sticky='SW', padx=2, pady=2)
+                        command = lambda: self.Delta1()).grid(sticky='SW')
 
 
-
+        label = self.text_entry('Please select files to begin!')
         #self.file1 = controller.shared_data['file1']
         #self.file2 = controller.shared_data['file2']
         #self.DATABASE1 = controller.shared_data['DATABASE1']
@@ -143,6 +143,7 @@ class PageOne(tk.Frame):
         #self.DATABASE3 = controller.shared_data['DATABASE3']
         #self.options = controller.shared_data['options']
         #self.Roof = controller.shared_data['Roof']
+    #    self.lighting_var = controller.shared_data['lighting_var']
 
     def text_entry(self,string):
         self.text_box.configure(state='normal')
@@ -167,6 +168,9 @@ class PageOne(tk.Frame):
         df = myfunctions.House(gui,DATA1,DATA2)
         df[0]['spot-price €/kWh'] = [0.00213,0.00220,0.00217,0.0217,0.00222,0.00235,0.00421,0.001254,0.001451,0.001641,0.001650,0.001580,0.001490,0.001389,0.001439,0.001486,0.001611,0.002784,0.003543,0.003377,0.001559,0.001332,0.001288,0.001219]
 
+        print("initial data")
+        print(DATA1)
+        print(DATA2)
         #save_data = myfunctions.Get_file_info(House_data[0], House_data[1])
         DATABASES = myfunctions.import_databases(gui)
 
@@ -207,7 +211,7 @@ class PageOne(tk.Frame):
         method = StringVar()
         list = ["Default","Efficiency","Price"]
         drop = OptionMenu(self, method, *list).grid(row=7,column=0, sticky="W")
-        confirm = Button(self, text= "confirm", command = lambda : self.display(method,files)).grid(row=7,column=1)
+        confirm = Button(self, text= "confirm", command = lambda : self.display(method,files)).grid(row=7, column=1)
 
 
         #Graph_page = Button(self, text="GraphPage",
@@ -239,15 +243,13 @@ class PageOne(tk.Frame):
 
     def display(self,method,files):
 
-        self.selection = method.get()
-        print("metoodju", self.selection)
+        method = method.get()
 
         var1 = IntVar()
         var2 = IntVar()
         var3 = IntVar()
         var4 = IntVar()
         var5 = IntVar()
-
 
         L = self.text_entry("Select primary energy sources")
         #L = Label(self, text="What primary energies are there available?").grid(row = 10, column = 0, columnspan=3, sticky='W')
@@ -260,9 +262,9 @@ class PageOne(tk.Frame):
 
         print("-----------------------------------")
 
-        Save = Button(self, text = "Save selection", command = lambda: self.show1(files, method,var1,var2,var3,var4,var5)).grid(row = 12, sticky="SE")
+        Save = Button(self, text = "Save selection", command = lambda: self.show1( method,var1,var2,var3,var4,var5)).grid(row = 12, sticky="W")
 
-    def show1(self, files, method, var1,var2,var3,var4,var5):
+    def show1(self, method, var1,var2,var3,var4,var5):
 
         textA = self.text_entry("Wind power: " + str(var1.get())+"\n")
         textB = self.text_entry("Solar PV: " + str(var2.get())+"\n")
@@ -272,27 +274,27 @@ class PageOne(tk.Frame):
 
 
         #list = {'Wind power': var1.get(), 'Solar PV':var2.get(),'Solar Heat panels':var3.get(),'Nuclear':var4.get()}
-        print(files[1])
-        files[1]["None"]= var4.get()
-        files[1]['Wind power']= var1.get()
-        files[1]['Solar PV']= var2.get()
-        files[1]['Solar heat panels'] = var3.get()
-        files[1]['Nuclear']= var4.get()
-        files[1]['Ground_heat'] = var5.get()
+        self.file2["None"]= var4.get()
+        self.file2['Wind power']= var1.get()
+        self.file2['Solar PV']= var2.get()
+        self.file2['Solar heat panels'] = var3.get()
+        self.file2['Nuclear']= var4.get()
+        self.file2['Ground_heat'] = var5.get()
 
         #{'Wind power': var1.get()}, {'Solar PV':var2.get()},{'Solar Heat panels':var3.get()},{'Nuclear':var4.get()})
-        print(files[1])
-        method = method.get()
+
 
         print("---––––––––––––––––––––––––")
-        files = myfunctions.solar_electricity(self, method)
+        print("method borde vara det här:", method)
+        myfunctions.solar_electricity(self, method)
         myfunctions.solar_heat(self,method)
         myfunctions.H_storage(self)
 
-        print("Files just nu")
-        print(self.files)
+
         myfunctions.lighting_consumtion(self)
-        myfunctions.analysis(self)
+        #Funkar hittills
+
+        myfunctions.analysis(self, method)
 
 
 
