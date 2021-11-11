@@ -12,61 +12,66 @@ import math
 
 
 
-#def Delta2(gui, DATA1):
-    #file_2 = Select_file(gui)
-    #file_2 = Check_file(file_2,gui)
-    #file_info = Label(gui,text="Your selection for File_2: "+ file_2)
-    #file_info.grid(row = 2, column = 1, pady = 5)
+def delta2(self):
+    file_2 = select_file()
+    file_2 = check_file(self,file_2)
+    file_info = self.text_entry("Your selection for File_2: "+ file_2)
+    DATA2 = read_file(file_2)
 
-    #DATA2 = Read_file2(file_2,gui)
-    #radera kanske?
-    #disp_data2 = Button(gui, text='Display data', command = lambda:myfunctions.show_data(gui,DATA)).grid(row=3, column = 1)
+    self.file2 = DATA2
+
+    Button6 = Button(self.frame3, text="Start program", command = lambda: self.start_program()).grid(row=0,pady = 3)
 
     #ta fram före inlämning!!!!
     #House_data = Button(gui, text="calculate house data", command = lambda:House(gui,DATA1,DATA2)).grid(row=3, column = 0)
-    #House_data = House(gui,DATA1,DATA2)
+    #House_data = House(gui,DATA1,DATA2)  # läser fil 2 och startar programmet sen
 
-def select_file(gui):
+def select_file():
     filetypes = (('csv-files', '*.csv'),('All files', '*.*'))
     filename = fd.askopenfilename(title='Open a file',initialdir='downloads/',filetypes=filetypes)
     return filename
 
-def read_file(filename,gui):
-
-    file = pd.read_csv(filename, sep=';')
+def read_file(filename):
     #fucked up csv reader because formatting
+    try:
+        file = pd.read_csv(filename, sep=';')
+        return file
 
-    print("Entered: Read_file")
-    return file
 
-def read_file2(gui, filename):
-    #For files without ; delimiter (normal csv)
-    file = pd.read_csv(filename)
-    print("Entered: Read_file2")
-    return file
-    #try:
+    except FileNotFoundError:
+        self.text_entry("Error! Could not read the file, make sure you selected the right file")
+        return False
+    except UnicodeDecodeError:
+        self.text_entry("Error! Could not decrypt the file, make sure you selected the right file")
+        return False
 
-    #except FileNotFoundError:
-    #    Label(gui,text="Error! Could not read the file, make sure you selected the right file").pack()
-    #    return False
-    #except UnicodeDecodeError:
-    #    Label(gui,text="Error! Could not decrypt the file, make sure you selected the right file").pack()
-    #    return False
-    return
+def read_file2(filename):
+    try:
+        #For files without ; delimiter (normal csv)
+        file = pd.read_csv(filename)
+        return file
+
+    except FileNotFoundError:
+        self.text_entry("Error! Could not read the file, make sure you selected the right file")
+        return False
+    except UnicodeDecodeError:
+        self.text_entry("Error! Could not decrypt the file, make sure you selected the right file")
+        return False
+
 
 def option_popup(gui):
 
     Choice = tk.messagebox.askyesno(title="Option", message="Your file is invalid. Do you want to try again?")
     return Choice
 
-def Check_file(file,gui):
+def check_file(self, file):
 
     #checks if the file selected is ok
     file=str(file)
     if file.endswith('csv'):
         return file
     else:
-        print("this is not a csv file")
+        self.text_entry("Your selection is not a csv file")
         file = False
         while file == False:
             Choice = option_popup(gui)
@@ -171,16 +176,15 @@ def Add_par(df2,static_values):
     return df2
 
 def calc_heat_w_e(self,df1,df2, DATABASE3):
-    print(DATABASE3)
-    print(df1)
+
     print("entered heat water energy calculator")
     #funktion för att hitta temperaturen ur headern här?
     delta_t=40-df2['Twaterin(ºC)'][0]
 
     #calculate energy to heat up hot water:
-    df1['Water(kW)'] = df1['Hot Water @ 40 C'] * delta_t*4.186/3.600
+    df1['Water(kWh)'] = df1['Hot Water @ 40 C'] * delta_t*4.186/3600
 
-    eff = df1['Water(kW)'].max()
+    eff = (df1['Water(kWh)']*1000).max()
     print(eff)
     list =[]
     for index, row in DATABASE3['HotWater'].iterrows():
@@ -205,15 +209,7 @@ def calc_heat_w_e(self,df1,df2, DATABASE3):
             self.text_entry("Selected hot water heater: \n")
             self.text_entry(item)
 
-
-
-
-
-
-
-
-
-
+        df2['Waterheater'] = item[0]
 
     return df1
 
@@ -235,13 +231,14 @@ def energy_supply(crit1, crit2):
 
 def tot_energy_heating(df1, df2):
     print("Entered tot_energy_heating function")
-    print(df2)
+
     OHPH = int(df2['Qpeople(W)']) #Wh, Occupation_heat_per_hour
 
     air_losses = calculate_air_heat_losses(df1,df2)
     df1['Heat_e (kWh)'] = ((df1['%AreaHeatingCooling']/100 * df2['Area (m2)'][0] - df1['Occupation'] * OHPH) /1000)-df1['H_loss (kW)'] - air_losses
 
     df1.loc[df1['Occupation'] == 0, 'Heat_e (kWh)'] = df2['null_heat'][0]
+
 
     return df1 #Fixed 8.11
 
@@ -262,8 +259,9 @@ def calculate_air_heat_losses(df1,df2):
 
 
 def lighting_consumtion(self):
-
-    lumens = self.file1['Lighting (lux)']*(self.file2['Height Lights (m)'][0])**2
+    print(self.file1['Lighting (lux)'])
+    print(self.file2['Height Lights (m)'])
+    lumens = self.file1['Lighting (lux)'] * self.file2['Height Lights (m)'][0] ** 2
     A = lumens/self.file1['Total lapms'] #gives lumen demand per light bulb
     lum_max = A.max()
     list =[]
@@ -489,8 +487,10 @@ def solar_electricity(self, method):
             return #Fixed 7.11
         else:
             return
+            print("eller fel här")
 
     else:
+        print("Fel här")
         return
 
 
@@ -554,8 +554,9 @@ def wind_energy(self, method):
         return
 
 def show3(self):
-    print("file1 här")
-    print(self.file1)
+    #for row in self.file1.iterrows():
+    self.text_entry(self.file1)
+    #print(self.file1)
     return
 
 def H_storage(self):
@@ -563,8 +564,6 @@ def H_storage(self):
     if int(self.file2['Solar heat panels']) == 1 and int(self.file2['Ground_heat']) == 1 :
 
         print("entered heat_storage")
-
-        btn = Button(self,text="presss", command = lambda: show3(self)).grid(sticky="S")
 
         self.file1['Heat_storage (kWh)'] = 0
         storage = {}
@@ -640,18 +639,17 @@ def get_graph_options(FILE1, FILE2,DATABASE1,DATABASE2):
 
 
 def show2(self):
-    print("Text",self.file2)
+    self.text_entry("––––––––––––––––––––––––––––––––––––––")
+    self.text_entry(self.file2)
     return
 
 def analysis(self, method):
     print("entered new_funct")
     print("––––––––––––––––––––––––––––––––––––––")
-    button = Button(self, text ="press", command=lambda:show2(self))
-    button.grid(sticky="s")
+
     #print(files[3])
 
     print(self.file1)
-    print("––––––––––––––––––––––––––––––––––––––")
     print("––––––––––––––––––––––––––––––––––––––")
     print("––––––––––––––––––––––––––––––––––––––")
 
@@ -659,11 +657,11 @@ def analysis(self, method):
     Databases = [self.DATABASE1,self.DATABASE2,self.DATABASE3]
 
     cooking_application(self, method)
+    heating_solution(self,method)
     total_electricity(self)
 
-    for items in Databases:
-        print(items.keys())
-    #print(Data[1].columns)
+
+
 
 
     print("––––––––––––––––––––––––––––––––––––––")
@@ -712,7 +710,134 @@ def cooking_application(self, method):
 
 
 
+def heating_solution(self,method):
+
+    print(self.file2['Solar heat panels'])
+    print(self.file2['Ground_heat'])
+
+    A       = self.DATABASE3['SpaceHeatingCooling']['Thermal PowerHeating (W)']
+    B       = self.DATABASE3['SpaceHeatingCooling']['Efficiency Heating']
+    COP_H   = A/B
+    C       = self.DATABASE3['SpaceHeatingCooling']['Thermal PowerCooling (W)']
+    D       = self.DATABASE3['SpaceHeatingCooling']['Efficiency Cooling']
+    COP_C   = C/D
+    heat_best = max(COP_H)/1000
+    cool_best = max(COP_C)/1000
+
+    print("HB",heat_best) #COP HB 2.444
+
+    print("CB",cool_best) #CB 2.115
+    E = 0
+    F = 0
+    for i in range(len(COP_H)):
+        if COP_H[i]==heat_best:
+            E = i
+    for j in range(len(COP_C)):
+        if COP_H[i]==cool_best:
+            F = j
+
+    #Implement controll for heating and cooling depending on sign if time left
+    #for row in self.file1['Heat_e (kWh)']:
+        #if row < 0:
+            #print(row)
+
+
+
+    if self.file2['Solar heat panels'][0] == 1 and self.file2['Ground_heat'][0] == 0:
+        list=[]
+        tot_heat = self.file1['Heat_e (kWh)']+self.file1['sol_h_prod (kWh)']
+        for row in tot_heat:
+
+            if row < 0:
+                print("---")
+                amount_of_kwh_per_heat = tot_heat/heat_best
+            else:
+                print("+++")
+                amount_of_kwh_per_heat= tot_heat/cool_best
+
+
+        self.file1["E_for_heating kWh"] = amount_of_kwh_per_heat  #Adding in electricity the amount needed to heat the required heat
+
+        selection = self.DATABASE3['SpaceHeatingCooling'].iloc[i]
+        self.file2['Heating_solution']= E
+
+        self.text_entry('Your selection for heating and cooling is:')
+        self.text_entry(selection)
+
+
+    elif self.file2['Solar heat panels'][0] == 0 and self.file2['Ground_heat'][0] == 0:
+
+        tot_heat = self.file1['Heat_e (kWh)']
+        for row in tot_heat:
+
+            if row < 0:
+                print("---")
+                amount_of_kwh_per_heat = tot_heat/heat_best
+            else:
+                print("+++")
+                amount_of_kwh_per_heat= tot_heat/cool_best
+
+        self.file1["E_for_heating kWh"] = amount_of_kwh_per_heat
+
+        selection = self.DATABASE3['SpaceHeatingCooling'].iloc[i]
+        self.file2['Heating_solution']= E
+
+        self.text_entry('Your selection for heating and cooling is:')
+        self.text_entry(selection)
+
+
+    elif self.file2['Solar heat panels'][0] == 1 and self.file2['Ground_heat'][0] == 1:
+
+        tot_heat = self.file1['Heat_e (kWh)']
+        for row in tot_heat:
+
+            if row < 0:
+                print("---")
+                amount_of_kwh_per_heat = tot_heat/heat_best
+            else:
+                print("+++")
+                amount_of_kwh_per_heat= tot_heat/cool_best
+
+        self.file1["E_for_heating kWh"] = amount_of_kwh_per_heat
+
+        selection = self.DATABASE3['SpaceHeatingCooling'].iloc[i]
+        self.file2['Heating_solution']= E
+
+        self.text_entry('Your selection for heating and cooling is:')
+        self.text_entry(selection)
+
+                #Användbar kod
+                #i = self.DATABASE3['SpaceHeatingCooling']['Efficiency Heating'].argmax()
+                #selection = self.DATABASE3['SpaceHeatingCooling'].iloc[i]['Name']
+
+
+    else:
+        print("unexpected error")
 
 
 def total_electricity(self):
-    pass
+    print(self.file2)
+    p_energies = [self.file2['Wind power'], self.file2['Solar PV'], self.file2['Solar heat panels'], self.file2['Nuclear'], self.file2['Ground_heat']]
+
+    Total1 = self.file1['El.consumtion (kwh)'].sum()
+    self.text_entry(':––––––––––––––––––––––––––––––––––––––––––––:')
+    self.text_entry(':                                            :')
+    self.text_entry('Total electricity use for electric appliances:')
+    self.text_entry(Total1)
+    self.text_entry(':––––––––––––––––––––––––––––––––––––––––––––:')
+
+    Total2 = self.file1['Water(kWh)'].sum()
+    Total3 = abs(self.file1['E_for_heating kWh']).sum()
+    Total4 = Total3+Total2
+    Total5 = Total4 +Total1
+    self.text_entry(':––––––––––––––––––––––––––––––––––––––––––––:')
+    self.text_entry(':                                            :')
+    self.text_entry('Total electricity use for heating            :')
+    self.text_entry(Total4)
+    self.text_entry(':––––––––––––––––––––––––––––––––––––––––––––:')
+
+    self.text_entry(':––––––––––––––––––––––––––––––––––––––––––––:')
+    self.text_entry(':                                            :')
+    self.text_entry('Total energy in total                        :')
+    self.text_entry(Total5)
+    self.text_entry(':––––––––––––––––––––––––––––––––––––––––––––:')

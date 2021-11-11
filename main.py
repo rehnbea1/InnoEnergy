@@ -8,7 +8,6 @@ from tkinter import *
 from tkinter.ttk import *
 import matplotlib
 matplotlib.use("TkAgg")
-#from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2TkAgg
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 from matplotlib.figure import Figure
 from PIL import ImageTk, Image
@@ -45,6 +44,7 @@ class Window(tk.Tk):
         container.grid_rowconfigure(0, weight=1)
         container.grid_columnconfigure(0, weight=1)
 
+
         #my_canvas = Canvas(container)
         #my_canvas.pack(fill="both",expand=True)
         #my_scrollbar = ttk.Scrollbar(self, orient="vertical", command = my_canvas.yview)
@@ -55,8 +55,6 @@ class Window(tk.Tk):
         #my_canvas.create_window((0,0),window=second_frame,anchor="nw")
 
 #       my_scrollbar = ttk.Scrollbar(main_frame, orient=VERTICAL, command = my_canvas.yscrollcommand).pack(side=RIGHT,fill=Y)
-
-        self.geometry("7000x700")
 
 
         self.image = Image.open('House.png')
@@ -74,7 +72,7 @@ class Window(tk.Tk):
             frame = F(container,self)
             self.frames[F] = frame
 
-            frame.grid(row = 0, column = 0, sticky = "nsew", padx=5, pady=5)
+            frame.grid(row = 0, column = 0, sticky = "nsew", padx=2, pady=2)
 
         self.show_frame(StartPage)
 
@@ -111,29 +109,59 @@ class StartPage(tk.Frame):
 
 
 
-
-
-
-
-
-
 class PageOne(tk.Frame):
 
     def __init__(self,parent,controller):
         tk.Frame.__init__(self,parent)
+        self.file1 = None
+        self.file2 = None
 
-        self.text_box = Text(self,width=80, height=20, bg ="grey",)
-        self.text_box.configure(state='disabled')
-        self.text_box.grid(column=0,sticky="E", columnspan=7)
         self.lighting_var  = StringVar()
-        label = tk.Label(self,text="PageOne", font= LARGE_FONT)
-        label.grid(sticky='NW', padx=2, pady=2)
 
-        Button1 = Button(self, text="Back to Home",
-                        command = lambda: controller.show_frame(StartPage)).grid(row = 1, sticky='NW')
-        Button2 = Button(self, text='Browse file_1',
-                        command = lambda: self.Delta1()).grid(sticky='SW')
+        frame_width = 300
 
+        self.frame1 = tk.Frame(self, bg = 'pink', width = frame_width, padx=5, pady=5)
+        self.frame1.grid(row=0)
+
+        self.frame2 = tk.Frame(self, bg = 'red', width = frame_width)
+        self.frame2.grid(row=1)
+
+        self.frame3 = tk.Frame(self, bg = 'blue', width = frame_width, height=20)
+        self.frame3.grid(row=2,ipady =5)
+
+        #Frame one
+        label = tk.Label(self.frame1,text="PageOne", font= LARGE_FONT)
+        label.grid(row=0, column =0)
+
+        Button1 = Button(self.frame1, text="Back to Home",
+                        command = lambda: controller.show_frame(StartPage)).grid(row=0,column =1)
+        Button2 = Button(self.frame1, text='Browse file_1',
+                        command = lambda: self.delta1()).grid(row=0,column =2)
+        Button3 = Button(self.frame1, text='Browse file_2',
+                        command = lambda: myfunctions.delta2(self)).grid(row = 0, column = 3)
+
+        Button4 = Button(self.frame1,text="Print file 1",
+                        command = lambda: myfunctions.show3(self)).grid(row=0,column =4)
+
+        Button5 = Button(self.frame1, text ="Print file 2", command=lambda:myfunctions.show2(self))
+        Button5.grid(row=0,column =5)
+
+        #Frame two
+        xscrollbar = Scrollbar(self, orient=HORIZONTAL)
+        xscrollbar.grid(sticky="S")
+
+        # Vertical (y) Scroll Bar
+        yscrollbar = Scrollbar(self)
+        yscrollbar.grid(sticky="E")
+
+        # Text Widget
+        self.text_box = Text(self.frame2,height=10, bg ="grey", wrap=NONE, xscrollcommand=xscrollbar.set, yscrollcommand=yscrollbar.set)
+        self.text_box.configure(state='disabled')
+        self.text_box.grid(sticky="EW" )
+
+        # Configure the scrollbars
+        xscrollbar.config(command=self.text_box.xview)
+        yscrollbar.config(command=self.text_box.yview)
 
         label = self.text_entry('Please select files to begin!')
         #self.file1 = controller.shared_data['file1']
@@ -152,20 +180,20 @@ class PageOne(tk.Frame):
         return
 
 
-    def Delta1(self):
+    def delta1(self):
 
         #Ta fram efter testning!!!!!
-        #file_1 = myfunctions.select_file(gui)
-        #file_1 = myfunctions.Check_file(file_1,gui)
-        #file_info = Label(gui, text="Your selection for File_1: "+ file_1)
-        #file_info.grid(row = 1, column = 1, pady = 5)
-        #DATA = myfunctions.Read_file2(file_1,gui)
-        DATA1 = myfunctions.read_file("/Users/albertrehnberg/Downloads/Dynamic_Data.csv",gui)
+        file_1 = myfunctions.select_file()
+        file_1 = myfunctions.check_file(self, file_1)
+        file_info = self.text_entry("Your selection for File_1: "+ file_1)
 
-        #file2 = Button(gui, text='Browse file_2', command = lambda:myfunctions.Delta2(gui,DATA))
-        #file2.grid(row = 2, column = 0, pady =10)
-        DATA2 = myfunctions.read_file("/Users/albertrehnberg/Downloads/Static_Data.csv",gui)
+        self.file1 = myfunctions.read_file2(file_1)
+
+        #DATA2 = myfunctions.read_file("/Users/albertrehnberg/Downloads/Static_Data.csv",gui)
         DATABASES = myfunctions.import_databases(gui)
+
+    def start_program(self):
+
         df = myfunctions.House(self,gui,DATA1,DATA2, DATABASES[2])
         df[0]['spot-price €/kWh'] = [0.00213,0.00220,0.00217,0.0217,0.00222,0.00235,0.00421,0.001254,0.001451,0.001641,0.001650,0.001580,0.001490,0.001389,0.001439,0.001486,0.001611,0.002784,0.003543,0.003377,0.001559,0.001332,0.001288,0.001219]
 
@@ -173,12 +201,6 @@ class PageOne(tk.Frame):
         print(DATA1)
         print(DATA2)
         #save_data = myfunctions.Get_file_info(House_data[0], House_data[1])
-
-
-        #HALVFÄRDIGT STUFF
-        #disp_data = Button(gui, text='Display data', command = lambda: myfunctions.show_data(gui,DATA))
-        #disp_data.grid(row=3, column = 1)
-        #Analysis = Button(gui, text="show graphs", command=lambda:myfunctions.analysis(gui, DATA))
 
         #stänger fönstret automatiskt nu
 
@@ -202,34 +224,19 @@ class PageOne(tk.Frame):
         self.files = [self.file1,self.file2,self.DATABASE1,self.DATABASE2,self.DATABASE3]
 
 
-
         #clicked = StringVar()
         #clicked.set("Select item")
         #drop = OptionMenu(self, clicked, *options).grid(row=6, column = 0, sticky="W")
         #mybutton = Button(self,text ='selection', command = lambda: self.show(self,clicked)).grid(row=6,column =1)
 
-
         method = StringVar()
         list = ["Default","Efficiency","Price"]
         drop = OptionMenu(self, method, *list).grid(row=7,column=0, sticky="W")
         confirm = Button(self, text= "confirm", command = lambda : self.display(method,files)).grid(row=7, column=1)
-
-
         #Graph_page = Button(self, text="GraphPage",
         #                command = lambda: Window.show_frame(self,GraphPage)).grid(row = 4)
-        #print("–––––FILE1–––––")
-        #print(FILE1.file)
-        #print("–––––FILE2–––––")
-        #print(FILE2)
-        #print("–––––DATABASE1–––––")
-        #p#rint(DATABASE1)
-        #print("–––––DATABASE2–––––")
-        #print(DATABASE2)
-
         return FILE1, FILE2, DATABASE1, DATABASE2
 
-
-        #Läsa, skriva och ändra csv-filen sker inne i denna funktion
 
         #Denna gör att filläsningsfunktionen kallas
 
@@ -288,29 +295,26 @@ class PageOne(tk.Frame):
         print("---––––––––––––––––––––––––")
         print("method borde vara det här:", method)
         myfunctions.solar_electricity(self, method)
-        myfunctions.solar_heat(self,method)
+        myfunctions.solar_heat(self, method)
         myfunctions.H_storage(self)
 
 
         myfunctions.lighting_consumtion(self)
         #Funkar hittills
 
-        myfunctions.analysis(self, method)
-
-
+        btn = Button(self, text="See results", command= lambda: myfunctions.analysis(self, method))
+        btn.grid(sticky="W")
 
 
 class GraphPage(tk.Frame):
 
     def __init__(self,parent,controller):
         tk.Frame.__init__(self,parent)
-        label = tk.Label(self,text="GraphPage", font= LARGE_FONT)
-        label.grid(row=1,pady=10)
+        #label = tk.Label(self,text="GraphPage", font= LARGE_FONT)
+        #label.grid(row=1,pady=10)
         self.file1 = controller.shared_data['file1']
         self.file2 = controller.shared_data['file2']
         self.options = controller.shared_data['options']
-        #tk.Label(self, text = "selected file : ").grid(row=10) # text assigns a permanent value
-
 
         Back_to_home_btn = Button(self, text="Back to Home",command = lambda: controller.show_frame(StartPage)).grid(sticky='NE', padx=2, pady=2)
 
@@ -326,9 +330,6 @@ class GraphPage(tk.Frame):
        canvas = FigureCanvasTkAgg(f, self)
        canvas.draw()
        canvas.get_tk_widget().grid(row = 5)
-
-
-
 
 
 gui = Window()
