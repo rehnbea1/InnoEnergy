@@ -1,8 +1,6 @@
 #fil för att skriva python kod
 
 import myfunctions
-import mymanagement
-import mygraphs
 import tkinter as tk
 from tkinter import *
 from tkinter.ttk import *
@@ -12,7 +10,7 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolb
 from matplotlib.figure import Figure
 from PIL import ImageTk, Image
 LARGE_FONT = ("Verdana", 12)
-
+import pandas as pd
 
 class File:
 
@@ -57,7 +55,17 @@ class Window(tk.Tk):
 #       my_scrollbar = ttk.Scrollbar(main_frame, orient=VERTICAL, command = my_canvas.yscrollcommand).pack(side=RIGHT,fill=Y)
 
 
-        self.image = Image.open('House.png')
+
+        if getattr(sys, 'frozen', False):
+            head_img = Image.open(
+                os.path.join(sys._MEIPASS, "./House.png'"))
+        else:
+            head_img = Image.open("./House.png")
+
+
+
+
+        self.image = head_img
         self.main_img = ImageTk.PhotoImage(self.image)
         label = Label(self, image = self.main_img)
         label.image = self.image
@@ -82,7 +90,7 @@ class Window(tk.Tk):
 
 
 class StartPage(tk.Frame):
-
+    print("––––––––––––––––––––––––––––––––––––––––––––––––StartPage–––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––")
     def __init__(self,parent,controller):
 
         tk.Frame.__init__(self,parent)
@@ -115,19 +123,38 @@ class PageOne(tk.Frame):
         tk.Frame.__init__(self,parent)
         self.file1 = None
         self.file2 = None
+        self.DATABASE1 =None
+        self.DATABASE2 =None
+        self.DATABASE3 =None
 
         self.lighting_var  = StringVar()
 
-        frame_width = 300
+        frame_width = 500
 
-        self.frame1 = tk.Frame(self, bg = 'pink', width = frame_width, padx=5, pady=5)
+        self.frame1 = tk.Frame(self, width = frame_width, padx=5, pady=5)
         self.frame1.grid(row=0)
 
-        self.frame2 = tk.Frame(self, bg = 'red', width = frame_width)
+        self.frame2 = tk.Frame(self, width = frame_width)
         self.frame2.grid(row=1)
 
-        self.frame3 = tk.Frame(self, bg = 'blue', width = frame_width, height=20)
-        self.frame3.grid(row=2,ipady =5)
+        self.frame3 = tk.Frame(self, width = frame_width, height=20)
+        self.frame3.grid(row=2,ipady =5, ipadx=0)
+
+        self.frame4 = tk.Frame(self, width = frame_width, height=20)
+        self.frame4.grid(row=3,ipady =5,ipadx=0)
+
+        self.frame5 = tk.Frame(self, width = frame_width, height=20)
+        self.frame5.grid(row=4,ipady =5,ipadx=0)
+
+        self.frame6 = tk.Frame(self, width = frame_width, height=20)
+        self.frame6.grid(row=5,ipady =5,ipadx=0)
+
+        self.frame7 = tk.Frame(self, width = frame_width, height=20)
+        self.frame7.grid(row=6,ipady =5,ipadx=0)
+
+        self.frame7 = tk.Frame(self, width = frame_width, height=20)
+        self.frame7.grid(row=7,ipady =5,ipadx=0)
+
 
         #Frame one
         label = tk.Label(self.frame1,text="PageOne", font= LARGE_FONT)
@@ -135,9 +162,11 @@ class PageOne(tk.Frame):
 
         Button1 = Button(self.frame1, text="Back to Home",
                         command = lambda: controller.show_frame(StartPage)).grid(row=0,column =1)
-        Button2 = Button(self.frame1, text='Browse file_1',
+
+        Button2 = Button(self.frame1, text='Browse dynamic file',
                         command = lambda: self.delta1()).grid(row=0,column =2)
-        Button3 = Button(self.frame1, text='Browse file_2',
+
+        Button3 = Button(self.frame1, text='Browse static file',
                         command = lambda: myfunctions.delta2(self)).grid(row = 0, column = 3)
 
         Button4 = Button(self.frame1,text="Print file 1",
@@ -155,7 +184,7 @@ class PageOne(tk.Frame):
         yscrollbar.grid(sticky="E")
 
         # Text Widget
-        self.text_box = Text(self.frame2,height=10, bg ="grey", wrap=NONE, xscrollcommand=xscrollbar.set, yscrollcommand=yscrollbar.set)
+        self.text_box = Text(self.frame2,height=30, bg ="grey", wrap=NONE, xscrollcommand=xscrollbar.set, yscrollcommand=yscrollbar.set)
         self.text_box.configure(state='disabled')
         self.text_box.grid(sticky="EW" )
 
@@ -179,7 +208,6 @@ class PageOne(tk.Frame):
         self.text_box.configure(state='disabled')
         return
 
-
     def delta1(self):
 
         #Ta fram efter testning!!!!!
@@ -187,52 +215,41 @@ class PageOne(tk.Frame):
         file_1 = myfunctions.check_file(self, file_1)
         file_info = self.text_entry("Your selection for File_1: "+ file_1)
 
-        self.file1 = myfunctions.read_file2(file_1)
+        self.file1 = myfunctions.read_file(file_1)
 
         #DATA2 = myfunctions.read_file("/Users/albertrehnberg/Downloads/Static_Data.csv",gui)
-        DATABASES = myfunctions.import_databases(gui)
+        DATABASES = myfunctions.import_databases(self)
+
 
     def start_program(self):
 
-        df = myfunctions.House(self,gui,DATA1,DATA2, DATABASES[2])
-        df[0]['spot-price €/kWh'] = [0.00213,0.00220,0.00217,0.0217,0.00222,0.00235,0.00421,0.001254,0.001451,0.001641,0.001650,0.001580,0.001490,0.001389,0.001439,0.001486,0.001611,0.002784,0.003543,0.003377,0.001559,0.001332,0.001288,0.001219]
+        df = myfunctions.House(self)
+        self.file1['spot-price €/kWh'] = [0.00213,0.00220,0.00217,0.0217,0.00222,0.00235,0.00421,0.001254,0.001451,0.001641,0.001650,0.001580,0.001490,0.001389,0.001439,0.001486,0.001611,0.002784,0.003543,0.003377,0.001559,0.001332,0.001288,0.001219]
 
         print("initial data")
-        print(DATA1)
-        print(DATA2)
+        print(self.file1)
+        print(self.file2)
+
         #save_data = myfunctions.Get_file_info(House_data[0], House_data[1])
-
         #stänger fönstret automatiskt nu
+        #files  = [df[0],df[1],DATABASES[0],DATABASES[1],DATABASES[2]]
 
-        files  = [df[0],df[1],DATABASES[0],DATABASES[1],DATABASES[2]]
-
-        FILE1 = File(df[0])
-        FILE2 = File(df[1])
-
-        DATABASE1 = File(DATABASES[0])
-        DATABASE2 = File(DATABASES[1])
-        DATABASE3 = File(DATABASES[2])
-
-        options = myfunctions.get_graph_options(FILE1,FILE2, DATABASE1,DATABASE2)
-
-        self.file1 =FILE1.file
-        self.file2 =FILE2.file
-        self.DATABASE1 =DATABASE1.file
-        self.DATABASE2 =DATABASE2.file
-        self.DATABASE3 =DATABASE3.file
-        self.options = options
-        self.files = [self.file1,self.file2,self.DATABASE1,self.DATABASE2,self.DATABASE3]
-
+        self.options = myfunctions.get_graph_options(self)
+        #self.files = [self.file1,self.file2,self.DATABASE1,self.DATABASE2,self.DATABASE3]
 
         #clicked = StringVar()
         #clicked.set("Select item")
         #drop = OptionMenu(self, clicked, *options).grid(row=6, column = 0, sticky="W")
         #mybutton = Button(self,text ='selection', command = lambda: self.show(self,clicked)).grid(row=6,column =1)
 
+        print("is data still ok")
+        print(self.file1)
+        print(self.file2)
+
         method = StringVar()
         list = ["Default","Efficiency","Price"]
-        drop = OptionMenu(self, method, *list).grid(row=7,column=0, sticky="W")
-        confirm = Button(self, text= "confirm", command = lambda : self.display(method,files)).grid(row=7, column=1)
+        drop = OptionMenu(self.frame4, method, *list).grid(row=0,column=0, sticky="W")
+        confirm = Button(self.frame4, text= "confirm", command = lambda : self.display(method)).grid(row=0, column=1)
         #Graph_page = Button(self, text="GraphPage",
         #                command = lambda: Window.show_frame(self,GraphPage)).grid(row = 4)
         return FILE1, FILE2, DATABASE1, DATABASE2
@@ -249,7 +266,7 @@ class PageOne(tk.Frame):
     #    selection1 = clicked.get()
     #    return
 
-    def display(self,method,files):
+    def display(self,method):
 
         method = method.get()
 
@@ -259,18 +276,18 @@ class PageOne(tk.Frame):
         var4 = IntVar()
         var5 = IntVar()
 
-        L = self.text_entry("Select primary energy sources")
+        L = self.text_entry("Select primary energy conversion methods")
         #L = Label(self, text="What primary energies are there available?").grid(row = 10, column = 0, columnspan=3, sticky='W')
-        wind        = Checkbutton(self, text = "Wind power",        variable = var1).grid(row = 11, column = 0, sticky='W')
-        solar_pv    = Checkbutton(self, text = "Solar PV",          variable = var2).grid(row = 11, column = 1, sticky='W')
-        solar_heat  = Checkbutton(self, text = "Solar Heat panels", variable = var3).grid(row = 11, column = 2, sticky='W')
-        nuclear     = Checkbutton(self, text = "Nuclear",           variable = var4).grid(row = 11, column = 3, sticky='W')
-        Ground_heat = Checkbutton(self, text = "Ground heat",       variable = var5).grid(row = 11, column = 4, sticky='W')
+        wind        = Checkbutton(self.frame5, text = "Wind power",        variable = var1).grid(row = 0, column = 0, sticky='W')
+        solar_pv    = Checkbutton(self.frame5, text = "Solar PV",          variable = var2).grid(row = 0, column = 1, sticky='W')
+        solar_heat  = Checkbutton(self.frame5, text = "Solar Heat panels", variable = var3).grid(row = 0, column = 2, sticky='W')
+        nuclear     = Checkbutton(self.frame5, text = "Nuclear",           variable = var4).grid(row = 0, column = 3, sticky='W')
+        Ground_heat = Checkbutton(self.frame5, text = "Ground heat",       variable = var5).grid(row = 0, column = 4, sticky='W')
 
 
         print("-----------------------------------")
 
-        Save = Button(self, text = "Save selection", command = lambda: self.show1( method,var1,var2,var3,var4,var5)).grid(row = 12, sticky="W")
+        Save = Button(self.frame5, text = "Save selection", command = lambda: self.show1( method,var1,var2,var3,var4,var5)).grid(row = 12, sticky="SW")
 
     def show1(self, method, var1,var2,var3,var4,var5):
 
@@ -292,17 +309,15 @@ class PageOne(tk.Frame):
         #{'Wind power': var1.get()}, {'Solar PV':var2.get()},{'Solar Heat panels':var3.get()},{'Nuclear':var4.get()})
 
 
-        print("---––––––––––––––––––––––––")
-        print("method borde vara det här:", method)
         myfunctions.solar_electricity(self, method)
         myfunctions.solar_heat(self, method)
-        myfunctions.H_storage(self)
 
+        myfunctions.H_storage(self)
 
         myfunctions.lighting_consumtion(self)
         #Funkar hittills
 
-        btn = Button(self, text="See results", command= lambda: myfunctions.analysis(self, method))
+        btn = Button(self.frame7, text="See results", command= lambda: myfunctions.analysis(self, method))
         btn.grid(sticky="W")
 
 
